@@ -1,0 +1,8 @@
+[Unit]
+Description=humio-perftest
+[Service]
+Restart=always
+EnvironmentFile=/etc/humio/ingest.env
+ExecStart=/usr/bin/perftest.sh com.humio.perftest.FixedRateIngestSimulation
+[Install]
+WantedBy=multi-user.target

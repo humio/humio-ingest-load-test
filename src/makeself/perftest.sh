@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+/usr/bin/java -jar -Dusers=${HUMIO_QUERY_USERS} -DtensGbPerDay=${HUMIO_TENS_GB_PER_DAY} -Dtoken=${HUMIO_INGEST_TOKEN} -Dbaseurls=${HUMIO_BASEURLS} -DsearchQuery=${HUMIO_SEARCH_QUERY} -DsearchDuration=${HUMIO_SEARCH_DURATION} /usr/lib/humio/perftest.jar -s $1

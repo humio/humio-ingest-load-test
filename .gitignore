@@ -1,0 +1,8 @@
+dist
+target
+.idea
+.settings
+.classpath
+.project
+
+results

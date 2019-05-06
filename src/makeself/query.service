@@ -1,0 +1,8 @@
+[Unit]
+Description=humio-perftest
+[Service]
+Restart=always
+EnvironmentFile=/etc/humio/query.env
+ExecStart=/usr/bin/perftest.sh com.humio.perftest.QuerySimulation
+[Install]
+WantedBy=multi-user.target
