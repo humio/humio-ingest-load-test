@@ -28,4 +28,5 @@ java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Duse
 ```
 
 
- 
+## License
+[Apache License, Version 2](http://www.apache.org/licenses/LICENSE-2.0.txt)
