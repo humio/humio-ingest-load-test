@@ -29,7 +29,7 @@ java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Duse
 
 
 ### Running with Docker
-docker run -e PERF_USERS=1000 -e PERF_DATASOURCES=50 -e PERF_BULK_SIZE=1000 -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> -e HUMIO_BASE_URL=https://test.EXAMPLE.com/api/v1/ingest/elastic-bulk -e PERF_SIMULATION=FixedRateIngestSimulation humio/humio-ingest-load-test:latest
+```docker run -e PERF_USERS=1000 -e PERF_DATASOURCES=50 -e PERF_BULK_SIZE=1000 -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> -e HUMIO_BASE_URL=https://test.EXAMPLE.com/api/v1/ingest/elastic-bulk -e PERF_SIMULATION=FixedRateIngestSimulation humio/humio-ingest-load-test:latest```
 
 
 ## License
