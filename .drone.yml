@@ -1,0 +1,12 @@
+kind: pipeline
+name: default
+
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    username: cihumio
+    password:
+      from_secret: docker_password
+    repo: humio/humio-ingest-load-test
+    tags: latest
