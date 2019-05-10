@@ -13,6 +13,6 @@ WORKDIR /humio-ingest-load-test
 RUN rm -rf /humio-perf-test-build
 
 #env variables required PERF_USERS PERF_BULK_SIZE PERF_DATASOURCES PERF_SIMULATION HUMIO_TOKEN HUMIO_BASE_URL
-# silulation is either HECSimulation or FixedRateIngestSimulation
+# silulation is either HECSimulation,FixedRateIngestSimulation, FileeatSimulation
 CMD ["sh", "-c", "java -jar -Dusers=${PERF_USERS} -Ddatasources=${PERF_DATASOURCES} -Dbulksize${PERF_BULK_SIZE} -Dtoken=${HUMIO_TOKEN} -Dbaseurls=${HUMIO_BASE_URL} perftest.jar -s com.humio.perftest.${PERF_SIMULATION}"]
 
