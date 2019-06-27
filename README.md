@@ -27,10 +27,48 @@ java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Duse
 java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Dusers=100 -Dtoken=<SOME-INGEST-TOKEN>  -jar ./perftest.jar -s com.humio.perftest.FilebeatSimulation
 ```
 
-
 ### Running with Docker
-```docker run -e PERF_USERS=1000 -e PERF_DATASOURCES=50 -e PERF_BULK_SIZE=1000 -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> -e HUMIO_BASE_URL=https://test.EXAMPLE.com/api/v1/ingest/elastic-bulk -e PERF_SIMULATION=FixedRateIngestSimulation humio/humio-ingest-load-test:latest```
 
+For HECSimulation the URL should be `$BASEURL/api/v1/ingest/hec`.
+
+For the FilebeatSimulation and FixedRateIngestSimulation the URL should be `$BASEURL/api/v1/ingest/elastic-bulk`.
+
+`$BASEURL` should be the URL containing the Humio host. For example https://cloud.humio.com.
+
+#### FixedRateIngestSimulation
+```
+docker run \
+  -e PERF_TIME=300 \
+  -e PERF_TENS_GB_PER_DAY=10 \
+  -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
+  -e HUMIO_BASE_URL=<URL to Humio ingest endpoint> \
+  -e PERF_SIMULATION=FixedRateIngestSimulation \
+  humio/humio-ingest-load-test:latest
+```
+
+#### HECSimulation or FilebeatSimulation
+```
+docker run \
+  -e PERF_TIME=300
+  -e PERF_USERS=1000 \
+  -e PERF_DATASOURCES=50 \
+  -e PERF_BULK_SIZE=1000 \
+  -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
+  -e HUMIO_BASE_URL=<URL to Humio ingest endpoint> \
+  -e PERF_SIMULATION=<HECSimulation or FilebeatSimulation> \
+  humio/humio-ingest-load-test:latest
+```
+
+#### QuerySimulation
+```
+docker run \
+  -e PERF_SEARCH_QUERY="count()" \
+  -e PERF_SEARCH_DURATION=24hours \
+  -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
+  -e HUMIO_BASE_URL=<URL to Humio> \
+  -e PERF_SIMULATION=QuerySimulation \
+  humio/humio-ingest-load-test:latest
+```
 
 ## License
 [Apache License, Version 2](http://www.apache.org/licenses/LICENSE-2.0.txt)
