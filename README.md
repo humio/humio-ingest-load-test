@@ -49,7 +49,7 @@ docker run \
 #### HECSimulation or FilebeatSimulation
 ```
 docker run \
-  -e PERF_TIME=300
+  -e PERF_TIME=300 \
   -e PERF_USERS=1000 \
   -e PERF_DATASOURCES=50 \
   -e PERF_BULK_SIZE=1000 \
