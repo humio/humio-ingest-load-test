@@ -24,6 +24,9 @@ handle, if that is part of the test.
 ```
 java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Dusers=100 -Dtoken=<SOME-INGEST-TOKEN>  -jar ./perftest.jar -s com.humio.perftest.HECSimulation
 
+java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Dusers=100 -Drandomness=3 -Dtoken=<SOME-INGEST-TOKEN>  -jar ./perftest.jar -s com.humio.perftest.HECRandomnessSimulation
+
+
 java -Dbulksize=1000 -Ddatasources=50 -Dbaseurls=https://test.EXAMPLE.COM  -Dusers=100 -Dtoken=<SOME-INGEST-TOKEN>  -jar ./perftest.jar -s com.humio.perftest.FilebeatSimulation
 ```
 
@@ -58,6 +61,22 @@ docker run \
   -e PERF_SIMULATION=<HECSimulation or FilebeatSimulation> \
   humio/humio-ingest-load-test:latest
 ```
+
+#### HECRandomnessSimulation
+```
+docker run \
+  -e PERF_TIME=300 \
+  -e PERF_USERS=1000 \
+  -e PERF_DATASOURCES=50 \
+  -e PERF_BULK_SIZE=1000 \
+  -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
+  -e HUMIO_BASE_URL=<URL to Humio ingest endpoint> \
+  -e PERF_SIMULATION=<HECSimulation or FilebeatSimulation> \
+  -e PERF_SIMULATION=HECRandomnessSimulation \
+  -e RANDOMNESS=3 \
+  humio/humio-ingest-load-test:latest
+```
+
 
 #### QuerySimulation
 ```

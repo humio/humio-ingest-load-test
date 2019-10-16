@@ -26,6 +26,7 @@ hec_simulation_args() {
   env_var_arg PERF_DATASOURCES datasources
   env_var_arg PERF_FIELDS fields
   env_var_arg PERF_USERS users
+  env_var_arg RANDOMNESS randomness 
 }
 
 fixed_rate_ingest_simulation() {
@@ -41,6 +42,9 @@ query_simulation() {
 
 case $perf_simulation in
   "HECSimulation")
+    cmd_args=$(hec_simulation_args)
+  ;;
+  "HECRandomnessSimulation")
     cmd_args=$(hec_simulation_args)
   ;;
   "FilebeatSimulation")
