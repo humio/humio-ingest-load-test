@@ -71,7 +71,6 @@ docker run \
   -e PERF_BULK_SIZE=1000 \
   -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
   -e HUMIO_BASE_URL=<URL to Humio ingest endpoint> \
-  -e PERF_SIMULATION=<HECSimulation or FilebeatSimulation> \
   -e PERF_SIMULATION=HECRandomnessSimulation \
   -e RANDOMNESS=3 \
   humio/humio-ingest-load-test:latest
