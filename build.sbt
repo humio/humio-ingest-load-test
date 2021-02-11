@@ -9,6 +9,8 @@ scalacOptions := Seq(
 
 libraryDependencies += "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.0.2"
 libraryDependencies += "io.gatling"            % "gatling-test-framework"    % "3.0.2"
+libraryDependencies += "org.apache.commons"    % "commons-math3"             % "3.6.1"
+libraryDependencies += "org.scalatra.scalate"  %% "scalate-core"             % "1.9.6"
 
 mainClass in Compile := Some("io.gatling.app.Gatling")
 
