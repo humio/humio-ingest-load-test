@@ -4,13 +4,14 @@ import com.humio.perftest.SimUtils.test
 import org.fusesource.scalate._
 import org.apache.commons.math3.distribution._
 
+import java.time.ZonedDateTime
+import java.util.{ Base64, Date }
+import scala.collection.immutable.HashMap
 import scala.collection.mutable
 
 object SimUtils {
   val minProbability = 0.0001
   val maxProbability = 0.999999
-
-  //val templateEngine = new TemplateEngine
 
   def test(sampler: Sampleable, iterations: Int) = {
     val values = new mutable.TreeMap[String, Int]
@@ -25,7 +26,22 @@ object SimUtils {
   }
 }
 
-class SimUtils {
+class SimTemplate(filename:String) {
+  val helper = new TemplateHelper
+  val templateEngine = new TemplateEngine
+  templateEngine.bindings = List(
+    Binding("data", "com.humio.perftest.TemplateHelper", true),
+    Binding("init", "Boolean", true))
+  templateEngine.escapeMarkup = false
+
+  // initialize replacement functions, output is sent to stdout
+  val output = templateEngine.layout(filename, Map("init" -> true, "data" -> helper))
+  println(output)
+
+  def generate() = {
+    // generate content
+    templateEngine.layout(filename, Map("init" -> false, "data" -> helper))
+  }
 }
 
 abstract class Sampleable(distribution: RealDistribution) {
@@ -43,7 +59,7 @@ abstract class Sampleable(distribution: RealDistribution) {
   def sample: String
 }
 
-class IntRangeSampler(distribution: RealDistribution, min: Int, max: Int) extends Sampleable(distribution = distribution) {
+class IntSampler(distribution: RealDistribution, min: Int, max: Int) extends Sampleable(distribution = distribution) {
   private val range = max - min
   override def sample: String = (min.toDouble + (range.toDouble * sampleDistribution).round).toInt.toString
 }
@@ -52,15 +68,16 @@ class ArraySampler(distribution: RealDistribution, values:Array[String]) extends
   override def sample: String = values(((values.length-1).toDouble * sampleDistribution).round.toInt)
 }
 
-class RealSampler(distribution: RealDistribution, min: Double, max: Double) extends Sampleable(distribution = distribution) {
+class RealSampler(distribution: RealDistribution, min: Double, max: Double, precision: Int = 4) extends Sampleable(distribution = distribution) {
   private val range = max - min
-  override def sample: String = (min + (range * sampleDistribution)).toString
+  def truncateAt(n: Double, p: Int): Double = { val s = math pow (10, p); (math floor n * s) / s }
+  override def sample: String = truncateAt((min + (range * sampleDistribution)), precision).toString
 }
 
 object SamplerTests extends App {
   val iterations = 100000
 
-  val intRangeSampler = new IntRangeSampler(
+  val intSampler = new IntSampler(
     new NormalDistribution(),
     10,
     20)
@@ -76,8 +93,8 @@ object SamplerTests extends App {
     1.0
   )
 
-  println("\nIntRangeSampler, 10 - 20, normal distribution: ")
-  SimUtils.test(intRangeSampler, iterations)
+  println("\nIntSampler, 10 - 20, normal distribution: ")
+  SimUtils.test(intSampler, iterations)
 
   println("\nArraySampler, exponential distribution: ")
   SimUtils.test(arraySampler, iterations)
@@ -87,3 +104,48 @@ object SamplerTests extends App {
 
 }
 
+class TemplateHelper {
+  // dates, timestamps
+  import java.text.DateFormat
+  import java.text.SimpleDateFormat
+  import java.util.TimeZone
+  val tz: TimeZone = TimeZone.getTimeZone("UTC")
+  val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
+
+  // hashing
+  val md = java.security.MessageDigest.getInstance("SHA-1")
+
+  // internal template initialization flag
+  var init:Boolean = true
+
+  // distribution-based sampling
+  val samplers = new mutable.HashMap[String, Sampleable]
+
+  def sample(name:String): String = {
+    samplers.get(name).get.sample
+  }
+
+  def register(name: String, sampler: Sampleable) = {
+    samplers.update(name, sampler)
+  }
+
+  // simple dynamic content generation
+  def timestamp(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
+  def iso8601Timestamp() = df.format(new Date())
+  def sha1(s: String) = Base64.getEncoder.encodeToString(md.digest(s.getBytes))
+}
+
+object TemplateTests extends App {
+  val simTemplate = new SimTemplate("templates/test.ssp")
+
+  // generate content
+  val t0 = System.currentTimeMillis()
+  var i = 0
+  while(i < 10) {
+    val output = simTemplate.generate
+    println(output)
+    i = i + 1
+  }
+  val t1 = System.currentTimeMillis()
+  println("\n\n" + i + " iterations, " + (t1 - t0) + "ms elapsed")
+}
