@@ -150,7 +150,7 @@ Templates typically use an _init block_ to create and register data generators a
 
 #### Template: Generation
 
-All code outside the _init_ block between `<%` and `%>` (see the `SSP` & Scalate reference docs for more information on this and other template directives) is executed on every data generation request.  This is the section where the actual data generation from the template takes place.  For example, with the `templates/test.ssp` example, this section is outside the _init_ block and is execution on every generation call:
+All code outside the _init_ block between `<%` and `%>` (see the `SSP` & Scalate reference docs for more information on this and other template directives) is executed on every data generation request.  This is the section where the actual data generation from the template takes place.  For example, with the `templates/test.ssp` example, this section is outside the _init_ block and is executed on every generation call:
 
 ```
     val sourceType = "applog"
