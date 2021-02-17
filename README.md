@@ -302,6 +302,8 @@ data.register("contentLength",
 		0, 256000))
 ```
 
+All available distributions are [subclasses of AbstractRealDistribution](https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/distribution/AbstractRealDistribution.html).
+
 ##### Distributions: Random Number Generation
 
 All distribution sampling uses the [`Well19937c`](https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/random/Well19937c.html) generator.
