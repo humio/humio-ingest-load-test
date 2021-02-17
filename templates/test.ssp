@@ -1,6 +1,5 @@
 <%
     import com.humio.perftest._
-    import org.apache.commons.math3.distribution._
     import play.api.libs.json._
     import org.fusesource.scalate._
     import org.fusesource.scalate.RenderContext._
@@ -9,35 +8,35 @@
         // log line elements
         data.register("httpMethod",
             new ArraySampler(
-                new ExponentialDistribution(1),
+                data.distributions.exponential,
                 Array("GET", "POST", "PUT", "DELETE", "OPTION")
             )
         )
         data.register("status",
             new ArraySampler(
-                new ExponentialDistribution(1),
+                data.distributions.exponential,
                 Array("200", "204", "400", "401", "404")
             )
         )
         data.register("internal",
             new ArraySampler(
-                new ExponentialDistribution(1),
+                data.distributions.exponential,
                 Array("true", "false")
             )
         )
-        data.register("time", new RealSampler(new ExponentialDistribution(1), 0, 1, 2))
-        data.register("subnet1", new IntSampler(new ExponentialDistribution(1), 0, 10))
-        data.register("subnet2", new IntSampler(new ExponentialDistribution(1), 0, 255))
-        data.register("port", new IntSampler(new UniformRealDistribution(), 20000, 65535))
-        data.register("cloudHost", new IntSampler(new UniformRealDistribution(), 0, 15))
-        data.register("viewAndQueryId", new IntSampler(new ExponentialDistribution(1), 0, 5))
-        data.register("contentLength", new IntSampler(new LogNormalDistribution(), 0, 256000))
+        data.register("time", new RealSampler(data.distributions.exponential, 0, 1, 2))
+        data.register("subnet1", new IntSampler(data.distributions.exponential, 0, 10))
+        data.register("subnet2", new IntSampler(data.distributions.exponential, 0, 255))
+        data.register("port", new IntSampler(data.distributions.uniform, 20000, 65535))
+        data.register("cloudHost", new IntSampler(data.distributions.uniform, 0, 15))
+        data.register("viewAndQueryId", new IntSampler(data.distributions.exponential, 0, 5))
+        data.register("contentLength", new IntSampler(data.distributions.logNormal, 0, 256000))
 
         // json elements
-        data.register("sourceNum", new IntSampler(new NormalDistribution(), 0, 20))
-        data.register("tagNum", new IntSampler(new ExponentialDistribution(1), 0, 8))
-        data.register("hostNum", new IntSampler(new LogNormalDistribution(), 0, 5))
-        data.register("testFieldVal", new IntSampler(new UniformRealDistribution(), 0, 100))
+        data.register("sourceNum", new IntSampler(data.distributions.normal, 0, 20))
+        data.register("tagNum", new IntSampler(data.distributions.exponential, 0, 8))
+        data.register("hostNum", new IntSampler(data.distributions.logNormal, 0, 5))
+        data.register("testFieldVal", new IntSampler(data.distributions.uniform, 0, 100))
     }
 
     val sourceType = "applog"

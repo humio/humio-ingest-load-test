@@ -76,6 +76,13 @@ class TemplateHelper {
   // distribution-based sampling
   val samplers = new mutable.HashMap[String, Sampleable]
 
+  object distributions {
+    def exponential = new ExponentialDistribution(1)
+    def normal = new NormalDistribution()
+    def logNormal = new LogNormalDistribution()
+    def uniform = new UniformRealDistribution()
+  }
+
   // sample from a registered sampler
   def sample(name:String): String = {
     samplers.get(name).get.sample
