@@ -199,7 +199,7 @@ There are a handful of functions available to generate simple types of data:
 For example, let's say you have a log line you would like to generate similar log lines of:
 
 ```
-2021-01-01T0:0:0.0Z requests 11 - route=humio method=GET %>, remote=10.0.1.10, ...
+2021-01-01T0:0:0.0Z requests 11 - route=humio method=GET, remote=10.0.1.10, ...
 ```
 
 Let's say we want to replace the values for the `method` and `remote` key-value pairs with data that is plausible.  The first step is to think about how the log line works: "What is the distribution of HTTP request methods for this endpoint?".  For this example, let's say it's predominantly `GET`, with `POST` a distant second, and the rest typically representative of error or malformed calls.  For simplicity, let's say it's best represented by an exponential distribution.
