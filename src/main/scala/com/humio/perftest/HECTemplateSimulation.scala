@@ -41,9 +41,6 @@ class HECTemplateSimulation extends Simulation {
   println(s"template=$templateFile")
   println(s"meanPauseDurationMs=$meanPauseDurationMs")
 
-  val realSampler = new RealSampler(new UniformRealDistribution(), 0, 1)
-  def nextArrival = (-Math.log(1.0 - realSampler.sampleDistribution) / (1 / meanPauseDurationMs)).toLong
-
   override def before(step: => Unit): Unit = super.before(step)
 
   val httpConf = http
@@ -63,14 +60,14 @@ class HECTemplateSimulation extends Simulation {
           .body(StringBody("${request}"))
           .processRequestBody(gzipBody)
           .check(status.is(200))
-        )
+        ).pause(Duration(meanPauseDurationMs, TimeUnit.MILLISECONDS))
     }
-
+  
   setUp(
     scn.inject(
       rampUsers(users) during(5 seconds)
     )
-      .customPauses(nextArrival)
+      .exponentialPauses
       .protocols(httpConf)
   )
 }
