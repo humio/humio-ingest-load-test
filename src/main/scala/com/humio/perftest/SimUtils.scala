@@ -9,11 +9,6 @@ import scala.collection.mutable
 
 // template handling
 
-object SimTemplate {
-  val minProbability = 0.0001
-  val maxProbability = 0.999999
-}
-
 class SimTemplate(filename:String) {
   val helper = new TemplateHelper
   val templateEngine = new TemplateEngine
@@ -22,7 +17,6 @@ class SimTemplate(filename:String) {
     Binding("init", "Boolean", true))
   templateEngine.escapeMarkup = false
 
-  // initialize template, output is sent to stdout
   val output = templateEngine.layout(filename, Map("init" -> true, "data" -> helper))
   println(output)
 
@@ -32,8 +26,11 @@ class SimTemplate(filename:String) {
 // data generation
 
 abstract class Sampleable(distribution: RealDistribution) {
-  val icp0 = distribution.inverseCumulativeProbability(SimTemplate.minProbability)
-  val icp1 = distribution.inverseCumulativeProbability(SimTemplate.maxProbability)
+  val minProbability = 0.0001
+  val maxProbability = 0.999999
+
+  val icp0 = distribution.inverseCumulativeProbability(minProbability)
+  val icp1 = distribution.inverseCumulativeProbability(maxProbability)
   val icpDif = icp1 - icp0
 
   def sampleDistribution = {
@@ -65,7 +62,6 @@ class RealSampler(distribution: RealDistribution, min: Double, max: Double, prec
 
 class TemplateHelper {
   // dates, timestamps
-  import java.text.DateFormat
   import java.text.SimpleDateFormat
   import java.util.TimeZone
   val tz: TimeZone = TimeZone.getTimeZone("UTC")
