@@ -25,8 +25,8 @@
             )
         )
         data.register("time", new RealSampler(data.distributions.exponential, 0, 1, 2))
-        data.register("subnet1", new IntSampler(data.distributions.exponential, 0, 10))
-        data.register("subnet2", new IntSampler(data.distributions.exponential, 0, 255))
+        data.register("host1", new IntSampler(data.distributions.exponential, 0, 10))
+        data.register("host2", new IntSampler(data.distributions.exponential, 0, 255))
         data.register("port", new IntSampler(data.distributions.uniform, 20000, 65535))
         data.register("cloudHost", new IntSampler(data.distributions.uniform, 0, 15))
         data.register("viewAndQueryId", new IntSampler(data.distributions.exponential, 0, 5))
@@ -48,7 +48,7 @@
     val queryId = "IQ-" + viewId.substring(0,5).reverse + viewId.substring(5).reverse
     var logLine: String = capture {
 %>
-${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remote=10.0.<%= data.sample("subnet1") %>.<%= data.sample("subnet2") %>:<%= data.sample("port") %> uri=http://newcloud<%= data.sample("cloudHost") %>:8080/api/v1/internal/views/${viewId}/queryjob/${queryId}, status=<%= data.sample("status") %>, time=<%= data.sample("time") %>, internal=<%= data.sample("internal") %>, contentLength=<%= data.sample("contentLength") %>
+${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remote=10.0.<%= data.sample("host1") %>.<%= data.sample("host2") %>:<%= data.sample("port") %> uri=http://newcloud<%= data.sample("cloudHost") %>:8080/api/v1/internal/views/${viewId}/queryjob/${queryId}, status=<%= data.sample("status") %>, time=<%= data.sample("time") %>, internal=<%= data.sample("internal") %>, contentLength=<%= data.sample("contentLength") %>
 <%
     }.trim // capture
     val jsonObj = Json.obj(

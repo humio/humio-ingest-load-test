@@ -32,8 +32,9 @@ class HECTemplateSimulation extends Simulation {
   val baseUrlString = Option(System.getProperty("baseurls")).getOrElse("https://testcloud01.humio.com")
   val baseUrls = baseUrlString.split(",").toList
 
-  println(s"configured users=$users")
-  println(s"configured time=$timeInMinutes minutes")
+  println(s"Configuration:\n")
+  println(s"users=$users")
+  println(s"time=$timeInMinutes minutes")
   println(s"token=$token")
   println(s"baseurls=${baseUrlString}  (Comma-separated)")
   println(s"dataspaces=$dataspaces")
@@ -62,7 +63,7 @@ class HECTemplateSimulation extends Simulation {
           .check(status.is(200))
         ).pause(Duration(meanPauseDurationMs, TimeUnit.MILLISECONDS))
     }
-  
+
   setUp(
     scn.inject(
       rampUsers(users) during(5 seconds)
