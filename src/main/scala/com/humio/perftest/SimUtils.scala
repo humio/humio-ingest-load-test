@@ -91,3 +91,21 @@ class TemplateHelper {
   def iso8601Timestamp() = df.format(new Date())
   def sha1(s: String) = Base64.getEncoder.encodeToString(md.digest(s.getBytes))
 }
+
+// testing templates from the command line
+
+object TemplateTest extends App {
+  val template =
+    if (args.length == 0) "templates/test.ssp"
+    else args(0)
+  val simTemplate = new SimTemplate(template)
+  val t0 = System.currentTimeMillis()
+  var i = 0
+  while(i < 10) {
+    val output = simTemplate.generate
+    println(output)
+    i = i + 1
+  }
+  val t1 = System.currentTimeMillis()
+  println("\n\n" + i + " iterations, " + (t1 - t0) + "ms elapsed")
+}
