@@ -224,7 +224,7 @@ data.register("host1", new IntSampler(data.distributions.exponential, 0, 10))
 data.register("host2", new IntSampler(data.distributions.uniform, 0, 20))
 ```
 
-The top generator, `host1`, is defined as a sampler over the integer range 0 to 10 with decreasing exponential probability (i.e., 0 is most likely, 10 least).  The bottom generator, `host2`, is defined as a sampler over the integer range 0 to 20, with uniform probability.
+The first generator, `host1`, is defined as a sampler over the integer range 0 to 10 with decreasing exponential probability (i.e., 0 is most likely, 10 least).  The second generator, `host2`, is defined as a sampler over the integer range 0 to 20, with uniform probability.
 
 The available samplers and distributions are described in complete below.
 
