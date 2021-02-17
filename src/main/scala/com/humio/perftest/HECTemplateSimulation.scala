@@ -13,14 +13,8 @@ import scala.util.Random
 
 object HECTemplateSimulation {
   val random = new Random()
-  def randomAlphaNumeric = Random.alphanumeric
-
-  def timestampStr(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
-
   val eventsPerBulk = Option(System.getProperty("bulksize")).getOrElse("100").toInt
   val dataspaces = Option(System.getProperty("dataspaces")).getOrElse("1").toInt
-  val eventSize = Option(System.getProperty("eventsize")).getOrElse("500").toInt
-  val fieldCount = Option(System.getProperty("fields")).getOrElse("10").toInt
   val templateFile = Option(System.getProperty("template")).getOrElse("templates/test.ssp")
 
   // init template
@@ -34,8 +28,6 @@ object HECTemplateSimulation {
       }
     events.mkString("\n")
   }
-
-  //s"""{"source":"${source}","#source":"${source}","event":{"line":"${msg}","tag":"f8738433fecc"},"time":"${time}","host":"perftesthost"}"""
 }
 
 import HECTemplateSimulation._
@@ -57,8 +49,6 @@ class HECTemplateSimulation extends Simulation {
   println(s"configured time=$timeInMinutes minutes")
   println(s"token=$token")
   println(s"baseurls=${baseUrlString}  (Comma-separated)")
-  println(s"fields=$fieldCount")
-  println(s"eventsize=$eventSize")
   println(s"dataspaces=$dataspaces")
   println(s"bulksize=$eventsPerBulk")
   println(s"template=$templateFile")
@@ -77,16 +67,12 @@ class HECTemplateSimulation extends Simulation {
 
   val httpConf = http
     .baseUrls(baseUrls) // Here is the root for all relative URLs
-    //.contentTypeHeader("application/json")
     .contentTypeHeader("text/plain; charset=utf-8")
     .acceptHeader("application/json") // Here are the common headers
     .header("Content-Encoding", "gzip") // Matches the processRequestBody(gzipBody)
     .acceptEncodingHeader("*") // "*" or "gzip" or "deflate" or "compress" or "identity"
     .userAgentHeader("gatling client")
-    //.basicAuth("qcSmluq1kkS9xuheGLdFagWRuEBpD5gu", "")
-    //.basicAuth("", token)
     .authorizationHeader(s"Bearer ${token}")
-    //.header("Authorization", "Bearer: ${token}")
 
   val scn = scenario("HEC ingestion") // A scenario is a chain of requests and pauses
     .during(timeInMinutes minutes) {
@@ -97,15 +83,11 @@ class HECTemplateSimulation extends Simulation {
           .processRequestBody(gzipBody)
           .check(status.is(200))
         )
-        //.pause(Duration(10, TimeUnit.MILLISECONDS))
     }
 
   setUp(
     scn.inject(
-      //constantUsersPerSec(1) during (10 minutes)
       rampUsers(users) during(5 seconds)
-      //atOnceUsers(100)
-      //constantUsersPerSec(50) during(15 minutes)
     )
       .customPauses(nextArrival)
       .protocols(httpConf)

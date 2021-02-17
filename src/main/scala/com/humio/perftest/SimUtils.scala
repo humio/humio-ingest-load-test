@@ -1,15 +1,15 @@
 package com.humio.perftest
 
-import com.humio.perftest.SimUtils.test
 import org.fusesource.scalate._
 import org.apache.commons.math3.distribution._
 
 import java.time.ZonedDateTime
 import java.util.{ Base64, Date }
-import scala.collection.immutable.HashMap
 import scala.collection.mutable
 
-object SimUtils {
+// template handling
+
+object SimTemplate {
   val minProbability = 0.0001
   val maxProbability = 0.999999
 
@@ -44,9 +44,11 @@ class SimTemplate(filename:String) {
   }
 }
 
+// data generation
+
 abstract class Sampleable(distribution: RealDistribution) {
-  val icp0 = distribution.inverseCumulativeProbability(SimUtils.minProbability)
-  val icp1 = distribution.inverseCumulativeProbability(SimUtils.maxProbability)
+  val icp0 = distribution.inverseCumulativeProbability(SimTemplate.minProbability)
+  val icp1 = distribution.inverseCumulativeProbability(SimTemplate.maxProbability)
   val icpDif = icp1 - icp0
 
   def sampleDistribution = {
@@ -74,6 +76,43 @@ class RealSampler(distribution: RealDistribution, min: Double, max: Double, prec
   override def sample: String = truncateAt((min + (range * sampleDistribution)), precision).toString
 }
 
+// template context class
+
+class TemplateHelper {
+  // dates, timestamps
+  import java.text.DateFormat
+  import java.text.SimpleDateFormat
+  import java.util.TimeZone
+  val tz: TimeZone = TimeZone.getTimeZone("UTC")
+  val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
+
+  // hashing
+  val md = java.security.MessageDigest.getInstance("SHA-1")
+
+  // internal template initialization flag
+  var init:Boolean = true
+
+  // distribution-based sampling
+  val samplers = new mutable.HashMap[String, Sampleable]
+
+  // sample from a registered sampler
+  def sample(name:String): String = {
+    samplers.get(name).get.sample
+  }
+
+  // register a sampler
+  def register(name: String, sampler: Sampleable) = {
+    samplers.update(name, sampler)
+  }
+
+  // simple dynamic content generation
+  def timestamp(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
+  def iso8601Timestamp() = df.format(new Date())
+  def sha1(s: String) = Base64.getEncoder.encodeToString(md.digest(s.getBytes))
+}
+
+// things that should be real tests of some kind
+
 object SamplerTests extends App {
   val iterations = 100000
 
@@ -94,51 +133,17 @@ object SamplerTests extends App {
   )
 
   println("\nIntSampler, 10 - 20, normal distribution: ")
-  SimUtils.test(intSampler, iterations)
+  SimTemplate.test(intSampler, iterations)
 
-  println("\nArraySampler, exponential distribution: ")
-  SimUtils.test(arraySampler, iterations)
+  println("\nArraySampler, 5 elements, exponential distribution: ")
+  SimTemplate.test(arraySampler, iterations)
 
-  println("\nRealSampler, 0.0 - 1.0, uniform distribution (10 iterations): ")
-  SimUtils.test(realSampler, 10)
-
-}
-
-class TemplateHelper {
-  // dates, timestamps
-  import java.text.DateFormat
-  import java.text.SimpleDateFormat
-  import java.util.TimeZone
-  val tz: TimeZone = TimeZone.getTimeZone("UTC")
-  val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
-
-  // hashing
-  val md = java.security.MessageDigest.getInstance("SHA-1")
-
-  // internal template initialization flag
-  var init:Boolean = true
-
-  // distribution-based sampling
-  val samplers = new mutable.HashMap[String, Sampleable]
-
-  def sample(name:String): String = {
-    samplers.get(name).get.sample
-  }
-
-  def register(name: String, sampler: Sampleable) = {
-    samplers.update(name, sampler)
-  }
-
-  // simple dynamic content generation
-  def timestamp(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
-  def iso8601Timestamp() = df.format(new Date())
-  def sha1(s: String) = Base64.getEncoder.encodeToString(md.digest(s.getBytes))
+  println("\nRealSampler, 0.0 - 1.0, uniform distribution: ")
+  SimTemplate.test(realSampler, 10)
 }
 
 object TemplateTests extends App {
   val simTemplate = new SimTemplate("templates/test.ssp")
-
-  // generate content
   val t0 = System.currentTimeMillis()
   var i = 0
   while(i < 10) {

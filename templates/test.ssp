@@ -1,0 +1,66 @@
+<%
+    import com.humio.perftest._
+    import org.apache.commons.math3.distribution._
+    import play.api.libs.json._
+    import org.fusesource.scalate._
+    import org.fusesource.scalate.RenderContext._
+
+    if (init) {
+        // log line elements
+        data.register("httpMethod",
+            new ArraySampler(
+                new ExponentialDistribution(1),
+                Array("GET", "POST", "PUT", "DELETE", "OPTION")
+            )
+        )
+        data.register("status",
+            new ArraySampler(
+                new ExponentialDistribution(1),
+                Array("200", "204", "400", "401", "404")
+            )
+        )
+        data.register("internal",
+            new ArraySampler(
+                new ExponentialDistribution(1),
+                Array("true", "false")
+            )
+        )
+        data.register("time", new RealSampler(new ExponentialDistribution(1), 0, 1, 2))
+        data.register("subnet1", new IntSampler(new ExponentialDistribution(1), 0, 10))
+        data.register("subnet2", new IntSampler(new ExponentialDistribution(1), 0, 255))
+        data.register("port", new IntSampler(new UniformRealDistribution(), 20000, 65535))
+        data.register("cloudHost", new IntSampler(new UniformRealDistribution(), 0, 15))
+        data.register("viewAndQueryId", new IntSampler(new ExponentialDistribution(1), 0, 5))
+        data.register("contentLength", new IntSampler(new LogNormalDistribution(), 0, 256000))
+
+        // json elements
+        data.register("sourceNum", new IntSampler(new NormalDistribution(), 0, 20))
+        data.register("tagNum", new IntSampler(new ExponentialDistribution(1), 0, 8))
+        data.register("hostNum", new IntSampler(new LogNormalDistribution(), 0, 5))
+        data.register("testFieldVal", new IntSampler(new UniformRealDistribution(), 0, 100))
+    }
+
+    val sourceType = "applog"
+    val ts = data.iso8601Timestamp
+    val logTs = data.timestamp
+    val tag = "tag" + data.sample("tagNum")
+    val source = "file" + data.sample("sourceNum")
+    val viewId = data.sha1(data.sample("viewAndQueryId")).substring(0,10)
+    val queryId = "IQ-" + viewId.substring(0,5).reverse + viewId.substring(5).reverse
+    var logLine: String = capture {
+%>
+${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remote=10.0.<%= data.sample("subnet1") %>.<%= data.sample("subnet2") %>:<%= data.sample("port") %> uri=http://newcloud<%= data.sample("cloudHost") %>:8080/api/v1/internal/views/${viewId}/queryjob/${queryId}, status=<%= data.sample("status") %>, time=<%= data.sample("time") %>, internal=<%= data.sample("internal") %>, contentLength=<%= data.sample("contentLength") %>
+<%
+    }.trim // capture
+    val jsonObj = Json.obj(
+        "source" -> source,
+        "sourcetype" -> sourceType,
+        "event" -> logLine,
+        "time" -> logTs,
+        "fields" -> Json.obj(
+            "host" -> "perftesthost",
+            "source2" -> source
+        )
+    )
+    val output = Json.toJson(jsonObj)
+%>${output.toString.trim}
