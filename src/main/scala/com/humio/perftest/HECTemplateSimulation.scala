@@ -18,11 +18,7 @@ object HECTemplateSimulation {
   val templateFile = Option(System.getProperty("template")).getOrElse("templates/test.ssp")
   val simTemplate = new SimTemplate(templateFile)
 
-  def request(): String = {
-    val events =
-      for (i <- 0 until eventsPerBulk) yield simTemplate.generate
-    events.mkString("\n")
-  }
+  def request(): String = (for (i <- 0 until eventsPerBulk) yield simTemplate.generate).mkString("\n")
 }
 
 import HECTemplateSimulation._
@@ -51,11 +47,11 @@ class HECTemplateSimulation extends Simulation {
   override def before(step: => Unit): Unit = super.before(step)
 
   val httpConf = http
-    .baseUrls(baseUrls) // Here is the root for all relative URLs
+    .baseUrls(baseUrls)
     .contentTypeHeader("text/plain; charset=utf-8")
-    .acceptHeader("application/json") // Here are the common headers
-    .header("Content-Encoding", "gzip") // Matches the processRequestBody(gzipBody)
-    .acceptEncodingHeader("*") // "*" or "gzip" or "deflate" or "compress" or "identity"
+    .acceptHeader("application/json")
+    .header("Content-Encoding", "gzip")
+    .acceptEncodingHeader("*")
     .userAgentHeader("gatling client")
     .authorizationHeader(s"Bearer ${token}")
 
