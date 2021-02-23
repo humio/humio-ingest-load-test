@@ -98,12 +98,15 @@ class TemplateHelper {
     sessionState.putIfAbsent(sessionId, new TrieMap[String, Any])
     sessionState.get(sessionId).get
   }
+  def state(sessionId:String, key:String): Any = {
+    state(sessionId).get(key).get
+  }
 
   // simple dynamic content generation
   import java.text.SimpleDateFormat
   import java.util.TimeZone
   val tz: TimeZone = TimeZone.getTimeZone("UTC")
-  val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'") // Quoted "Z" to indicate UTC, no timezone offset
+  val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
 
   def timestamp(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
   def iso8601Timestamp() = df.format(new Date())
