@@ -9,7 +9,6 @@ import java.time.ZonedDateTime
 import java.util.{ Base64, Date }
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
-import scala.reflect.internal.util.TableDef.Column
 
 // template handling
 
