@@ -10,6 +10,9 @@
         // session state machine setup
         data.sessionSetup(data.distributions.uniform, 5)
 
+        // CSV init
+        data.register("fruitCSV", new CSVSampler(data.distributions.normal, "templates/test.csv"))
+
         // log line elements
         data.register("httpMethod",
             new ArraySampler(
@@ -63,6 +66,9 @@
         }
     }
 
+    // sample CSV row
+    val sampledRow = data.sampleRow("fruitCSV")
+
     val sourceType = "applog"
     val ts = data.iso8601Timestamp
     val logTs = data.timestamp
@@ -84,8 +90,11 @@ ${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remo
             "host" -> "perftesthost",
             "source2" -> source,
             "session_id" -> sessionId,
-            "state_data" -> someStateValue
+            "state_data" -> someStateValue,
+            "fruit_type" -> sampledRow(1),
+            "fruit_color" -> sampledRow(2)
         )
     )
     val output = Json.toJson(jsonObj)
 %>${output.toString.trim}
+

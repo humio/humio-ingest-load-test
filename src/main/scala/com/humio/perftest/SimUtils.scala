@@ -1,12 +1,15 @@
 package com.humio.perftest
 
+import com.github.tototoshi.csv.CSVReader
 import org.fusesource.scalate._
 import org.apache.commons.math3.distribution._
 
+import java.io.File
 import java.time.ZonedDateTime
 import java.util.{ Base64, Date }
 import scala.collection.concurrent.TrieMap
 import scala.collection.mutable
+import scala.reflect.internal.util.TableDef.Column
 
 // template handling
 
@@ -41,7 +44,8 @@ abstract class Sampleable(distribution: RealDistribution) {
     else (sample - icp0) / icpDif
   }
 
-  def sample: String
+  def sample: String = throw new Exception("'sample' not implemented for this type of sampler. Did you mean 'sampleRow'?")
+  def sampleRow: List[String] = throw new Exception("'sampleRow' not implemented for this type of sampler. Did you mean 'sample'?")
 }
 
 class IntSampler(distribution: RealDistribution, min: Int, max: Int) extends Sampleable(distribution = distribution) {
@@ -66,6 +70,19 @@ class BooleanSampler(distribution: RealDistribution) extends Sampleable(distribu
   def sampleBoolean: Boolean = if (sampleDistribution.round == 1) true else false
 }
 
+class CSVSampler(distribution: RealDistribution, filename: String, ignoreHeader: Boolean = false) extends Sampleable(distribution = distribution) {
+  println(s"Reading CSV '${filename}'")
+  val reader = CSVReader.open(new File(filename))
+  val values = reader.all
+  reader.close
+  override def sampleRow: List[String] = {
+    // this is technically incorrect but this particular application is not an exact science
+    val idx = ((values.length-1).toDouble * sampleDistribution).round.toInt
+    if (ignoreHeader && idx == 0) values(1)
+    values(idx)
+  }
+}
+
 // template context class
 
 class TemplateHelper {
@@ -82,7 +99,8 @@ class TemplateHelper {
 
   val samplers = new mutable.HashMap[String, Sampleable]
   def register(name: String, sampler: Sampleable) = samplers.update(name, sampler)
-  def sample(name:String): String = samplers.get(name).get.sample
+  def sample(name:String) = samplers.get(name).get.sample
+  def sampleRow(name:String) = samplers.get(name).get.sampleRow
 
   // session handling
   val sessionState = new TrieMap[String, TrieMap[String, Any]]
