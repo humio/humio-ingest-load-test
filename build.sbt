@@ -12,6 +12,7 @@ libraryDependencies += "io.gatling"            % "gatling-test-framework"    % "
 libraryDependencies += "org.apache.commons"    % "commons-math3"             % "3.6.1"
 libraryDependencies += "org.scalatra.scalate" %% "scalate-core" % "1.9.5"
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.9.2"
+libraryDependencies += "org.apache.commons" % "commons-csv" % "1.8"
 
 mainClass in Compile := Some("io.gatling.app.Gatling")
 
