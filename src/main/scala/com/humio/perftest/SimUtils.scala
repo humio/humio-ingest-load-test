@@ -47,21 +47,27 @@ abstract class Sampleable(distribution: RealDistribution) {
   def sampleRow: List[String] = throw new Exception("'sampleRow' not implemented for this type of sampler. Did you mean 'sample'?")
 }
 
-class IntSampler(distribution: RealDistribution, min: Int, max: Int) extends Sampleable(distribution = distribution) {
+class IntSampler(distribution: RealDistribution,
+                 min: Int = Int.MinValue,
+                 max: Int = Int.MaxValue) extends Sampleable(distribution = distribution) {
   private val range = max - min
   override def sample: String = sampleInt.toString
   def sampleInt = (min.toDouble + (range.toDouble * sampleDistribution).round).toInt
 }
 
-class ArraySampler(distribution: RealDistribution, values:Array[String]) extends Sampleable(distribution = distribution) {
-  override def sample: String = values(((values.length-1).toDouble * sampleDistribution).round.toInt)
-}
-
-class RealSampler(distribution: RealDistribution, min: Double, max: Double, precision: Int = 4) extends Sampleable(distribution = distribution) {
+class RealSampler(distribution: RealDistribution,
+                  min: Double = Double.MinValue,
+                  max: Double = Double.MaxValue,
+                  precision: Int = 4) extends Sampleable(distribution = distribution) {
   private val range = max - min
   def truncateAt(n: Double, p: Int): Double = { val s = math pow (10, p); (math floor n * s) / s }
   override def sample: String = sampleReal.toString
   def sampleReal = truncateAt((min + (range * sampleDistribution)), precision)
+}
+
+class ArraySampler(distribution: RealDistribution,
+                   values:Array[String]) extends Sampleable(distribution = distribution) {
+  override def sample: String = values(((values.length-1).toDouble * sampleDistribution).round.toInt)
 }
 
 class BooleanSampler(distribution: RealDistribution) extends Sampleable(distribution = distribution) {
@@ -69,7 +75,9 @@ class BooleanSampler(distribution: RealDistribution) extends Sampleable(distribu
   def sampleBoolean: Boolean = if (sampleDistribution.round == 1) true else false
 }
 
-class CSVSampler(distribution: RealDistribution, filename: String, ignoreHeader: Boolean = false) extends Sampleable(distribution = distribution) {
+class CSVSampler(distribution: RealDistribution,
+                 filename: String,
+                 ignoreHeader: Boolean = false) extends Sampleable(distribution = distribution) {
   println(s"Reading CSV '${filename}'")
   val reader = CSVReader.open(new File(filename))
   val values = reader.all
@@ -79,6 +87,9 @@ class CSVSampler(distribution: RealDistribution, filename: String, ignoreHeader:
     val idx = ((values.length-1).toDouble * sampleDistribution).round.toInt
     if (ignoreHeader && idx == 0) values(1)
     values(idx)
+  }
+  override def sample = {
+    sampleRow(0)
   }
 }
 
