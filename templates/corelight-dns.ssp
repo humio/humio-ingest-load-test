@@ -3,6 +3,7 @@
     import play.api.libs.json._
     import org.fusesource.scalate._
     import org.fusesource.scalate.RenderContext._
+    import org.apache.commons.math3.distribution._
 
     // setup
     if (init) {
@@ -90,7 +91,7 @@
             "TC" -> false,
             "RA" -> true,
             "RD" -> true,
-            "Z" -> data.sample("Z"),
+            "Z" -> z,
             "answers" -> answers,
             "TTLs" -> ttls,
             "rejected" -> (if (rejected == "1") true else false)
