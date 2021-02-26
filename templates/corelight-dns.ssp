@@ -11,24 +11,6 @@
             new CSVSampler(data.distributions.normal, "templates/data/dns.csv"))
 
         // log line elements
-        data.register("httpMethod",
-            new ArraySampler(
-                data.distributions.exponential,
-                Array("GET", "POST", "PUT", "DELETE", "OPTION")
-            )
-        )
-        data.register("status",
-            new ArraySampler(
-                data.distributions.exponential,
-                Array("200", "204", "400", "401", "404")
-            )
-        )
-        data.register("internal",
-            new ArraySampler(
-                data.distributions.exponential,
-                Array("true", "false")
-            )
-        )
         data.register("uid", new IntSampler(data.distributions.normal, 0, 166956))
         data.register("id.orig_h_host2", new IntSampler(data.distributions.normal, 0, 200))
         data.register("id.orig_p", new IntSampler(data.distributions.uniform, 16000, 65535))
