@@ -56,9 +56,6 @@
     val ttl_rest = (1 to answers.length-1).map(_idx => data.sample("ttl_2") + ".0").toList
     val ttls = List(first_ttl) ++ ttl_rest
 
-    val qclass = "1"
-    val qclass_name = "C_INTERNET"
-    
     val qtype_row = data.sampleRow("qtype")
     val qtype_name = qtype_row(0)
     val qtype = qtype_row(1)
@@ -67,8 +64,6 @@
     val rcode_name = rcode_row(0)
     val rcode = rcode_row(1)
 
-    val rd = "1"
-    val ra = "1"
     val z = data.sample("Z")
     val aa = data.sample("AA")
     val rejected = data.sample("rejected")
@@ -85,15 +80,16 @@
             "proto" -> proto,
             "trans_id" -> trans_id,
             "query" -> query,
-            "qclass" -> qclass,
-            "qclass_name" -> qclass_name,
+            "qclass" -> "1",
+            "qclass_name" -> "C_INTERNET",
             "qtype" -> qtype,
             "qtype_name" -> qtype_name,
             "rcode" -> rcode,
             "rcode_name" -> rcode_name,
             "AA" -> (if (aa == "1") true else false),
             "TC" -> false,
-            "RA" -> (if (ra == "1") true else false),
+            "RA" -> true,
+            "RD" -> true,
             "Z" -> data.sample("Z"),
             "answers" -> answers,
             "TTLs" -> ttls,
