@@ -80,7 +80,7 @@ class CSVSampler(distribution: RealDistribution,
                  ignoreHeader: Boolean = false) extends Sampleable(distribution = distribution) {
   println(s"Reading CSV '${filename}'")
   val reader = CSVReader.open(new File(filename))
-  val values = reader.all
+  val values = reader.all.toArray
   reader.close
   override def sampleRow: List[String] = {
     // this is technically incorrect but this particular application is not an exact science
@@ -107,7 +107,7 @@ class TemplateHelper {
     def uniform = new UniformRealDistribution()
   }
 
-  val samplers = new mutable.HashMap[String, Sampleable]
+  val samplers = new TrieMap[String, Sampleable]
   def register(name: String, sampler: Sampleable) = samplers.update(name, sampler)
   def sample(name:String) = samplers.get(name).get.sample
   def sampleRow(name:String) = samplers.get(name).get.sampleRow
