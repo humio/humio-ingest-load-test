@@ -19,6 +19,8 @@ class SimTemplate(filename:String) {
     Binding("data", "com.humio.perftest.TemplateHelper", true),
     Binding("init", "Boolean", true))
   templateEngine.escapeMarkup = false
+  templateEngine.allowReload = false
+  templateEngine.allowCaching = true
 
   val output = templateEngine.layout(filename, Map("init" -> true, "data" -> helper))
   println(output)
