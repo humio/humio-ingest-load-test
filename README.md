@@ -202,7 +202,7 @@ For example, let's say you have a log line you would like to generate similar lo
 2021-01-01T0:0:0.0Z requests 11 - route=humio method=GET, remote=10.0.1.10, ...
 ```
 
-Let's say we want to replace the values for the `method` and `remote` key-value pairs with data that is plausible.  The first step is to think about how the log line works: "What is the distribution of HTTP request methods for this endpoint?".  For this example, let's say it's predominantly `GET`, with `POST` a distant second, and the rest typically representative of error or malformed calls.  For simplicity, let's say it's best represented by an exponential distribution.
+We want to replace the values for the `method` and `remote` key-value pairs with data that is plausible.  The first step is to think about how the log line works: "What is the distribution of HTTP request methods for this endpoint?".  For this example, let's say it's predominantly `GET`, with `POST` a distant second, and the rest typically representative of error or malformed calls.  For the purposes of this example, let's say it's best represented by an exponential distribution.  Highly accurate distribution estimation is not generally necessary to achieve the aims of this project and its methods are beyond the scope of this document.
 
 So, for `method`, to sample from an array of values with exponentially decreasing probability (more later on his this mapping is achieved), you can create an `ArraySampler` and register it with the name `httpMethod`:
 
@@ -238,6 +238,8 @@ ${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remo
 
 The relevant part in this context is this: `<$= data.sample("httpMethod") %>`.  The `<%=` and `%>` tags say "execute the code within this block and output the value.  The `data.sample("httpMethod")` code requests a sample from the sampler registered under the name `httpMethod`, which we created and registered above.  The same concept applies to the _host1_ and _host2_ samplers.
 
+Note: `CSVSampler` is a sampler that exposes a `sampleRow` function as well as a `sample` function.  `sampleRow` samples a row of values from the provided CSV file that can then be access by index, e.g., `someVar(1)`.  Using `sample` with a `CSVSampler` simply returns the value in the first column of the sampled row.
+
 #### Samplers: Built-ins
 
 | Name | Description | Signature |
@@ -245,12 +247,13 @@ The relevant part in this context is this: `<$= data.sample("httpMethod") %>`.  
 | ArraySampler | Samples from an array of Strings. | `new ArraySampler(<distribution>, Array("value", ...))` |
 | IntSampler | Samples from an increasing range of integers. | `new IntSampler(<distribution>, <lower>, <upper>)` |
 | RealSampler | Samples from an increasing range of doubles. | `new RealSampler(<distribution>, <lower>, <upper>)` |
-
+| CSVSampler | Samples rows from a CSV file. | `new CSVSampler(<distribution>, "<csv filename>")` |
+ 
 #### Distributions
 
 ##### Distributions: Method
 
-Distributions are implemented with the [Apache Commons Math Library](https://commons.apache.org/proper/commons-math/userguide/distribution.html).  Since they are distributions over the reals, the following method was used to map the probabilities onto Arrays, integers and doubles (see `SimUtils` for further information):
+Distributions are implemented with the [Apache Commons Math Library](https://commons.apache.org/proper/commons-math/userguide/distribution.html).  Since they are distributions over the reals, the following method was used to map probabilities (see `SimUtils` for further information):
 
 ```
 abstract class Sampleable(distribution: RealDistribution) {
@@ -307,6 +310,52 @@ All available distributions are [subclasses of AbstractRealDistribution](https:/
 ##### Distributions: Random Number Generation
 
 All distribution sampling uses the [`Well19937c`](https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/random/Well19937c.html) generator.
+
+### Tips
+
+#### Correlated Values
+
+Let's say you have a pair of fields being generated that must be correlated, e.g., a pair of fields named `rcode_name` and `rcode`, where they both hold a value that relates to the other.  A good way to do this is to use a `CSVSampler` that references a CSV file that maps one to the other, e.g.,
+
+```
+NOERROR,0
+SERVFAIL,2
+NXDOMAIN,3
+REFUSED,5
+```
+
+With this input to the `CSVSampler`, along with an appropriate distribution, you can use `sampleRow`, e.g.,
+
+```
+// init:
+data.register("rcode", new CSVSampler(data.distributions.exponential, "templates/data/dns_rcode.samples.csv"))
+
+// sample:
+val rcodeRow = data.sampleRow("rcode")
+val rcodeName = rcodeRow(0)
+val rcode = rcodeRow(1)
+```
+
+For a real-world example of this, see the `corelight-dns.ssp` template.
+
+#### Simple Random Sampling (with replacement)
+
+Let's say you have a variable that you're unsure how to model, but you _do_ have many observations of that variable (the "_sample frame_").  One method of sampling this variable is to load a CSV file with _all_ the observations -- do not process this list of values in any way! -- into a `CSVSampler` with a _uniform_ distribution, e.g.,
+
+```
+// init:
+data.register("TTL", new CSVSampler(data.distributions.uniform, "templates/data/dns_ttls0.csv"))
+
+// sample:
+val ttl = data.sample("TTL")
+```
+
+The bigger the sample frame, the more the sampled data will be representative of the underlying distribution.  
+
+_Notes_: 
+
+* All `CSVSampler` data is stored in memory: be mindful and plan accordingly when using large sets of observations.
+* While there are many opportunities for significant error when using this method, for simple data generation tasks it can still be useful.
 
 ### Utilities
 
