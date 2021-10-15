@@ -55,7 +55,7 @@ Example json:
 {"event":{"line":{"foo":"bar"},"source":"stdout","tag":"827c2e53fd2b"},"time":"1547108008.650023","host":"linuxkit-025000000001"}
  */
 
-    s"""{"source":"${source}","#source":"${source}","event":{"line":"${msg}","tag":"f8738433fecc"},"time":"${time}","host":"perftesthost"}"""
+    s"""{"source":"${source}","event":{"line":"${msg}","tag":"f8738433fecc"},"time":"${time}","host":"perftesthost"}"""
   }
 }
 
