@@ -1,8 +1,9 @@
-FROM hseeberger/scala-sbt:8u222_1.3.3_2.13.1
+FROM hseeberger/scala-sbt:8u312_1.5.8_2.13.7
 
 RUN apt-get update  && apt-get install -y \
     build-essential \
-    make
+    make \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /humio-ingest-load-test-build
 COPY . /humio-ingest-load-test-build/
