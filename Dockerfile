@@ -7,12 +7,13 @@ RUN apt-get update  && apt-get install -y \
 
 WORKDIR /humio-ingest-load-test-build
 COPY . /humio-ingest-load-test-build/
-RUN make
-RUN mkdir /humio-ingest-load-test
-RUN cp /humio-ingest-load-test-build/target/scala-2.12/perftest.jar /humio-ingest-load-test/
-RUN cp /humio-ingest-load-test-build/entrypoint.sh /humio-ingest-load-test/
+RUN make && \
+mkdir /humio-ingest-load-test \
+&& cp /humio-ingest-load-test-build/target/scala-2.12/perftest.jar /humio-ingest-load-test/ \
+&& cp /humio-ingest-load-test-build/entrypoint.sh /humio-ingest-load-test/ \
+&& cp -R /humio-ingest-load-test-build/templates /humio-ingest-load-test/templates
 WORKDIR /humio-ingest-load-test
-RUN rm -rf /humio-perf-test-build
-RUN chmod +x /humio-ingest-load-test/entrypoint.sh
+RUN rm -rf /humio-perf-test-build \
+&& chmod +x /humio-ingest-load-test/entrypoint.sh
 
 ENTRYPOINT ["/humio-ingest-load-test/entrypoint.sh"]

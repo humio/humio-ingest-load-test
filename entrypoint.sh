@@ -29,6 +29,15 @@ hec_simulation_args() {
   env_var_arg RANDOMNESS randomness 
 }
 
+hec_template_simulation_args() {
+  common_args
+  env_var_arg PERF_BULK_SIZE bulksize
+  env_var_arg PERF_DATASPACES dataspaces
+  env_var_arg PERF_DATASOURCES datasources
+  env_var_arg PERF_USERS users
+  env_var_arg TEMPLATE template
+}
+
 fixed_rate_ingest_simulation() {
   common_args
   env_var_arg PERF_TENS_GB_PER_DAY tensGbPerDay
@@ -43,6 +52,9 @@ query_simulation() {
 case $perf_simulation in
   "HECSimulation")
     cmd_args=$(hec_simulation_args)
+  ;;
+  "HECTemplateSimulation")
+    cmd_args=$(hec_template_simulation_args)
   ;;
   "HECRandomnessSimulation")
     cmd_args=$(hec_simulation_args)

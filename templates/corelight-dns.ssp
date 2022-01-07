@@ -1,0 +1,103 @@
+<%
+    import com.humio.perftest._
+    import play.api.libs.json._
+    import org.fusesource.scalate._
+    import org.fusesource.scalate.RenderContext._
+    import org.apache.commons.math3.distribution._
+
+    // setup
+    if (init) {
+        // domain/ip(s) pairs
+        data.register("domains", 
+            new CSVSampler(data.distributions.normal, "templates/data/dns.csv"))
+
+        // log line elements
+        data.register("uid", new IntSampler(data.distributions.normal, 0, 166956))
+        data.register("id.orig_h_host2", new IntSampler(data.distributions.normal, 0, 200))
+        data.register("id.orig_p", new IntSampler(data.distributions.uniform, 16000, 65535))
+        data.register("id.resp_h", new CSVSampler(data.distributions.logNormal, "templates/data/dns_id.resp_h.samples.csv"))
+        data.register("id.resp_p", new ArraySampler(data.distributions.logNormal, Array("53", "137", "5355", "5353")))
+        data.register("trans_id", new IntSampler(data.distributions.uniform, 0, 65535))
+        data.register("proto", new ArraySampler(data.distributions.exponential, Array("udp", "tcp")))
+        data.register("qtype", new CSVSampler(data.distributions.logNormal, "templates/data/dns_qtype.samples.csv"))
+        data.register("rcode", new CSVSampler(data.distributions.logNormal, "templates/data/dns_rcode.samples.csv"))
+        data.register("Z", new ArraySampler(data.distributions.logNormal, 
+            Array("0", "1", "1", "1", "1", "1")))
+
+        // ttl for first answer
+        data.register("ttl_1", new CSVSampler(data.distributions.uniform, "templates/data/dns_ttls0.csv"))
+        
+        // ttls for subsequent answers (if they exist)
+        data.register("ttl_2", new CSVSampler(data.distributions.uniform, "templates/data/dns_ttls1.csv"))
+        
+        // guesstimate
+        data.register("AA", new ArraySampler(data.distributions.logNormal, 
+            Array("0", "0", "0", "0", "0", "1")))
+
+        // guesstimate
+        data.register("rejected", new ArraySampler(data.distributions.logNormal, 
+            Array("0", "0", "0", "0", "1", "1")))
+    }
+
+    // build data
+
+    val uid = "C" + data.sha1(data.sample("uid")).substring(0,20)
+    val id_orig_h = "192.168.0." + data.sample("id.orig_h_host2")
+    val id_orig_p = data.sample("id.orig_p")
+    val id_resp_h = data.sample("id.resp_h")
+    val id_resp_p = data.sample("id.resp_p")
+    val proto = data.sample("proto")
+    val trans_id = data.sample("trans_id")
+    
+    val domain_row = data.sampleRow("domains")
+    val query = domain_row(0)
+    val answers = domain_row(1).split(" ")
+    
+    val first_ttl = data.sample("ttl_1") + ".0"
+    val ttl_rest = (1 to answers.length-1).map(_idx => data.sample("ttl_2") + ".0").toList
+    val ttls = List(first_ttl) ++ ttl_rest
+
+    val qtype_row = data.sampleRow("qtype")
+    val qtype_name = qtype_row(0)
+    val qtype = qtype_row(1)
+
+    val rcode_row = data.sampleRow("rcode")
+    val rcode_name = rcode_row(0)
+    val rcode = rcode_row(1)
+
+    val z = data.sample("Z")
+    val aa = data.sample("AA")
+    val rejected = data.sample("rejected")
+
+    val jsonObj = Json.obj(
+        "source" -> "corelight-dns",
+        "sourcetype" -> "json",
+        "event" -> Json.obj(
+            "uid" -> uid,
+            "id.orig_h" -> id_orig_h,
+            "id.orig_p" -> id_orig_p,
+            "id.resp_h" -> id_resp_h,
+            "id.resp_p" -> id_resp_p,
+            "proto" -> proto,
+            "trans_id" -> trans_id,
+            "query" -> query,
+            "qclass" -> "1",
+            "qclass_name" -> "C_INTERNET",
+            "qtype" -> qtype,
+            "qtype_name" -> qtype_name,
+            "rcode" -> rcode,
+            "rcode_name" -> rcode_name,
+            "AA" -> (if (aa == "1") true else false),
+            "TC" -> false,
+            "RA" -> true,
+            "RD" -> true,
+            "Z" -> z,
+            "answers" -> answers,
+            "TTLs" -> ttls,
+            "rejected" -> (if (rejected == "1") true else false)
+        ),
+        "time" -> data.timestamp
+    )
+    val output = Json.toJson(jsonObj)
+%>${output.toString.trim}
+

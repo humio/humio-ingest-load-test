@@ -1,0 +1,100 @@
+<%
+    import com.humio.perftest._
+    import play.api.libs.json._
+    import org.fusesource.scalate._
+    import org.fusesource.scalate.RenderContext._
+
+    // session state machine testing
+
+    if (init) {
+        // session state machine setup
+        data.sessionSetup(data.distributions.uniform, 5)
+
+        // CSV init
+        data.register("fruitCSV", new CSVSampler(data.distributions.normal, "templates/test.csv"))
+
+        // log line elements
+        data.register("httpMethod",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("GET", "POST", "PUT", "DELETE", "OPTION")
+            )
+        )
+        data.register("status",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("200", "204", "400", "401", "404")
+            )
+        )
+        data.register("internal",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("true", "false")
+            )
+        )
+        data.register("time", new RealSampler(data.distributions.exponential, 0, 1, 2))
+        data.register("host1", new IntSampler(data.distributions.exponential, 0, 10))
+        data.register("host2", new IntSampler(data.distributions.exponential, 0, 255))
+        data.register("port", new IntSampler(data.distributions.uniform, 20000, 65535))
+        data.register("cloudHost", new IntSampler(data.distributions.uniform, 0, 15))
+        data.register("viewAndQueryId", new IntSampler(data.distributions.exponential, 0, 5))
+        data.register("contentLength", new IntSampler(data.distributions.logNormal, 0, 256000))
+
+        // json elements
+        data.register("sourceNum", new IntSampler(data.distributions.normal, 0, 20))
+        data.register("tagNum", new IntSampler(data.distributions.exponential, 0, 8))
+        data.register("hostNum", new IntSampler(data.distributions.logNormal, 0, 5))
+        data.register("testFieldVal", new IntSampler(data.distributions.uniform, 0, 100))
+    }
+
+    val SESSION_STEP = "step"
+    val sessionId = data.sessionId()
+    data.state(sessionId).putIfAbsent(SESSION_STEP, "0")
+
+    val someStateValue = data.state(sessionId, SESSION_STEP) match {
+        case "0" => {
+            data.state(sessionId).put(SESSION_STEP, "1")
+            "step 0"
+        }
+        case "1" => {
+            data.state(sessionId).put(SESSION_STEP, "2")
+            "step 1"
+        }
+        case "2" => {
+            data.state(sessionId).put(SESSION_STEP, "0")
+            "step 2"
+        }
+    }
+
+    // sample CSV row
+    val sampledRow = data.sampleRow("fruitCSV")
+
+    val sourceType = "applog"
+    val ts = data.iso8601Timestamp
+    val logTs = data.timestamp
+    val tag = "tag" + data.sample("tagNum")
+    val source = "file" + data.sample("sourceNum")
+    val viewId = data.sha1(data.sample("viewAndQueryId")).substring(0,10)
+    val queryId = "IQ-" + viewId.substring(0,5).reverse + viewId.substring(5).reverse
+    var logLine: String = capture {
+%>
+${logTs} requests 11 - route=humio method=<%= data.sample("httpMethod") %>, remote=10.0.<%= data.sample("host1") %>.<%= data.sample("host2") %>:<%= data.sample("port") %> uri=http://newcloud<%= data.sample("cloudHost") %>:8080/api/v1/internal/views/${viewId}/queryjob/${queryId}, status=<%= data.sample("status") %>, time=<%= data.sample("time") %>, internal=<%= data.sample("internal") %>, contentLength=<%= data.sample("contentLength") %>
+<%
+    }.trim // capture
+    val jsonObj = Json.obj(
+        "source" -> source,
+        "sourcetype" -> sourceType,
+        "event" -> logLine,
+        "time" -> logTs,
+        "fields" -> Json.obj(
+            "host" -> "perftesthost",
+            "source2" -> source,
+            "session_id" -> sessionId,
+            "state_data" -> someStateValue,
+            "fruit_type" -> sampledRow(1),
+            "fruit_color" -> sampledRow(2)
+        )
+    )
+    val output = Json.toJson(jsonObj)
+%>${output.toString.trim}
+
