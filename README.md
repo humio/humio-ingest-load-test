@@ -100,7 +100,7 @@ docker run \
   -e HUMIO_BASE_URL=<URL to Humio ingest endpoint> \
   -e PERF_SIMULATION=HECTemplateSimulation \
   -e TEMPLATE=templates/my-template.ssp> \
-  -v /Users/me/humio-load-test-templates:/humio-ingest/templates/my-template.ssp> \
+  -v /Users/me/humio-load-test-templates:/humio-ingest-load-test/templates/my-template.ssp> \
   humio/humio-ingest-load-test:latest
 ```
 
