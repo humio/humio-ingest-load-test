@@ -1,0 +1,107 @@
+<%
+    // Required Imports
+    import com.humio.perftest._
+    import play.api.libs.json._
+    import org.fusesource.scalate._
+    import org.fusesource.scalate.RenderContext._
+	import java.time.LocalDateTime
+	import java.time.format.DateTimeFormatter
+    import java.time.ZoneId;
+    import java.time.ZoneOffset;
+
+    if (init) {
+    	// Load CSV reference files
+    	data.register("vpcaccountCSV", new CSVSampler(data.distributions.uniform, "templates/data/vpc-accountid.csv"))
+    	data.register("interfaceCSV", new CSVSampler(data.distributions.uniform, "templates/data/vpc-interfaceid.csv"))
+        data.register("portsCSV", new CSVSampler(data.distributions.exponential, "templates/data/vpc-ports.csv"))
+    	
+    	// Create arrays for action, logstatus, and protocol values
+        data.register("action",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("ACCEPT", "REJECT", "-")
+            )
+        )
+        data.register("logstatus",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("OK", "NODATA","SKIPDATA")
+            )
+        )
+        data.register("protocol",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("6", "-", "17", "1", "41")
+            )
+        )
+
+        // Create 4 numbers from 1 to 255 to use to generate IP addresses
+        data.register("ip1", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip2", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip3", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
+
+        // Create a value between 1 and 9342 for the packet field
+        data.register("packets", new IntSampler(data.distributions.normal, 1, 9342))
+
+        // Create a value between 1 and 100000 for bytes
+        data.register("bytes", new IntSampler(data.distributions.normal, 1, 100000))
+
+        // Create a value between 0 and 3 for minusSeconds
+        data.register("minusSeconds", new IntSampler(data.distributions.normal, 0, 4))
+    }
+
+    // Grab single values from the init block variables
+    val accountRow = data.sampleRow("vpcaccountCSV")
+    val accountStr =  accountRow(1)
+    val interfaceRow = data.sampleRow("interfaceCSV")
+    val interfaceStr = interfaceRow(1)
+    val logstatusStr = data.sample("logstatus")
+    val portRow = data.sampleRow("portsCSV")
+    val portRow2 = data.sampleRow("portsCSV")
+    var srcportStr:String = portRow(1)
+    var dstportStr:String = portRow2(1)
+    var actionStr:String = data.sample("action")    
+    var protocolStr:String = data.sample("protocol").toString
+    var packetsStr:String = data.sample("packets").toString
+    var bytesStr:String = data.sample("bytes").toString
+
+    // Create srcaddr and dstaddr variables
+    var srcaddrStr:String = data.sample("ip1") + "." + data.sample("ip2") + "." + data.sample("ip3") + "." + data.sample("ip4")
+    var dstaddrStr:String = data.sample("ip1") + "." + data.sample("ip2") + "." + data.sample("ip3") + "." + data.sample("ip4")
+
+    // If status is NODATA or SKIP data set the following values to "-"
+    if (logstatusStr.equals("NODATA") || logstatusStr.equals("SKIPDATA")) {
+        srcaddrStr = "-"
+        dstaddrStr = "-"
+        srcportStr = "-"
+        dstportStr = "-"
+        protocolStr = "-"
+        packetsStr = "-"
+        bytesStr = "-"
+        actionStr = "-"
+    }
+
+    // Create start and end date values
+    // Start date is now - some number of milliseconds
+    // End date is start date + some number of millisecond but less than now
+    val minusSeconds = data.sample("minusSeconds")
+    val start = LocalDateTime.now.minusSeconds(minusSeconds.toInt)
+    val end = LocalDateTime.now
+    val startStr = start.toEpochSecond(ZoneOffset.UTC).toString
+    val endStr = end.toEpochSecond(ZoneOffset.UTC).toString
+
+    // Create the actual event string and then output
+    var logLine: String = capture {
+%>
+2 ${accountStr} ${interfaceStr} ${srcaddrStr} ${dstaddrStr} ${srcportStr} ${dstportStr} ${protocolStr} ${packetsStr} ${bytesStr} ${startStr} ${endStr} ${actionStr} ${logstatusStr}
+<%
+    }.trim // capture
+
+    // HEC Endpoint takes a JSON object
+    val jsonObj = Json.obj(
+        "event" -> logLine, /// Event field = @rawstring
+        "time" -> data.timestamp /// Event Time Stamp
+    )
+    val output = Json.toJson(jsonObj)
+%>${output.toString.trim}
