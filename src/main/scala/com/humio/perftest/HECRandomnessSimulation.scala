@@ -87,6 +87,8 @@ class HECRandomnessSimulation extends Simulation {
     super.before(step)
   }
 
+  NoTlsCheck.init()
+
   val httpConf = http
     .baseUrls(baseUrls) // Here is the root for all relative URLs
     .contentTypeHeader("application/json")
