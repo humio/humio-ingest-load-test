@@ -19,7 +19,7 @@ To use this template when running the humio-ingest-load-test tool you would use 
 
 ```
 docker run \
-  -v /<local-path-to-cloned-repository>/humio-ingest-load-test/templates:/humio-ingest-load-test/templates \
+  -v /<local-path-to-cloned-repository>/humio-ingest-load-test/templates/humio-ingest-load-test/templates \
   -e PERF_TIME=300 \
   -e PERF_USERS=1000 \
   -e PERF_DATASOURCES=50 \
