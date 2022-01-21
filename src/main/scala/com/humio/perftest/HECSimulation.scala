@@ -23,6 +23,8 @@ object HECSimulation {
   val fieldCount = Option(System.getProperty("fields")).getOrElse("10").toInt
 
   def request(): String = {
+    val sourceFileTag = random.nextInt(datasourcesPerDataspace)
+    val source = s"file${sourceFileTag}"
     val events =
       for (i <- 0 until eventsPerBulk) yield {
         val time = timestampStr()
@@ -35,8 +37,6 @@ object HECSimulation {
           rndPart10.append(" ").append(s"arg${i}=${rndPart}${r}")
         }
         val msg = msgFirstPart + rndPart10.toString()
-        val sourceFileTag = random.nextInt(datasourcesPerDataspace)
-        val source = s"file${sourceFileTag}"
         val l = createEventLine(msg, time, source)
         l
       }

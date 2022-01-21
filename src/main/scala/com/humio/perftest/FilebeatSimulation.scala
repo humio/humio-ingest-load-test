@@ -29,6 +29,8 @@ object FilebeatSimulation {
   val fieldCount = Option(System.getProperty("fields")).getOrElse("10").toInt
 
   def request(): String = {
+    val sourceFileTag = random.nextInt(datasourcesPerDataspace)
+    val source = s"file${sourceFileTag}"
     val time = timestampStr()
     val events =
       for (i <- 0 until eventsPerBulk) yield {
@@ -41,8 +43,6 @@ object FilebeatSimulation {
           rndPart10.append(" ").append(s"arg${i}=${rndPart}${r}")
         }
         val msg = msgFirstPart + rndPart10.toString()
-        val sourceFileTag = random.nextInt(datasourcesPerDataspace)
-        val source = s"file${sourceFileTag}"
         s"${indexline}\n${createEventJson(msg, Map("source" -> source))}"
       }
     events.mkString("\n")

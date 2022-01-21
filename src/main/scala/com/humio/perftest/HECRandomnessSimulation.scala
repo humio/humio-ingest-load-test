@@ -24,6 +24,8 @@ object HECRandomnessSimulation {
   val randomness = Option(System.getProperty("randomness")).getOrElse("1").toInt
 
   def request(): String = {
+    val sourceFileTag = random.nextInt(datasourcesPerDataspace)
+    val source = s"file${sourceFileTag}"
     val events =
       for (i <- 0 until eventsPerBulk/randomness) yield {
         val time = timestampStr()
@@ -36,8 +38,6 @@ object HECRandomnessSimulation {
           rndPart10.append(" ").append(s"arg${i}=${rndPart}${r}")
         }
         val msg = msgFirstPart + rndPart10.toString()
-        val sourceFileTag = random.nextInt(datasourcesPerDataspace)
-        val source = s"file${sourceFileTag}"
         val lout = new StringBuilder()
         for (i <- 1 to randomness) {
           lout.append(createEventLine(msg, time, source)+"\n")
