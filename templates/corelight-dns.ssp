@@ -24,6 +24,9 @@
         data.register("Z", new ArraySampler(data.distributions.logNormal, 
             Array("0", "1", "1", "1", "1", "1")))
 
+        // host for tagging
+        data.register("host", new IntSampler(data.distributions.normal, 0, 768))
+
         // ttl for first answer
         data.register("ttl_1", new CSVSampler(data.distributions.uniform, "templates/data/dns_ttls0.csv"))
         
@@ -40,6 +43,8 @@
     }
 
     // build data
+
+    val host = data.sample("host")
 
     val uid = "C" + data.sha1(data.sample("uid")).substring(0,20)
     val id_orig_h = "192.168.0." + data.sample("id.orig_h_host2")
@@ -72,6 +77,7 @@
     val jsonObj = Json.obj(
         "source" -> "corelight-dns",
         "sourcetype" -> "json",
+        "host" -> host,
         "event" -> Json.obj(
             "uid" -> uid,
             "id.orig_h" -> id_orig_h,

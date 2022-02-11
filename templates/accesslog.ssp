@@ -34,6 +34,9 @@
         data.register("ip3", new IntSampler(data.distributions.uniform, 1, 255))
         data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
 
+        // create an integeger for good tagging, rack location 
+        data.register("host", new IntSampler(data.distributions.uniform, 1, 768))
+
         // Create a value between 99 and 13302 for response size field
         data.register("responsesize", new IntSampler(data.distributions.uniform, 99, 13302))
 
@@ -56,6 +59,8 @@
     val urlRow = data.sampleRow("urlCSV")
     var urlStr:String =  urlRow(1)
 
+    val host = data.sample("host")
+
     // Appends a product or blog post number to the end of a url
     if (urlStr.startsWith("/products")) { urlStr = urlStr + data.sample("productid") }
     else if (urlStr.startsWith("/blog")) { urlStr = urlStr + data.sample("productid") }
@@ -69,6 +74,7 @@
 
     // HEC Endpoint takes a JSON object
     val jsonObj = Json.obj(
+        "host" -> host, /// host for tagging
         "event" -> logLine, /// Event field = @rawstring
         "time" -> data.timestamp /// Event Time Stamp
     )
