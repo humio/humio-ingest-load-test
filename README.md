@@ -394,5 +394,9 @@ sbt:humio-ingest-load-test> runMain com.humio.perftest.TemplateTest templates/te
 {"source":"file4","sourcetype":"applog","event":"1613578255.579000 requests 11 - route=humio method=GET, remote=10.0.0.13:36705 uri=http://newcloud13:8080/api/v1/internal/views/tlifxqsNyC/queryjob/IQ-xfiltCyNsq, status=204, time=0.0, internal=true, contentLength=709","time":"1613578255.579000","fields":{"host":"perftesthost","source2":"file4"}}
 ```
 
+### Sample Templates
+
+This project includes sample templates that can be found in the templates directory: [templates](templates).
+
 ## License
 [Apache License, Version 2](http://www.apache.org/licenses/LICENSE-2.0.txt)
