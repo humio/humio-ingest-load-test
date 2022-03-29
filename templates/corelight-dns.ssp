@@ -78,6 +78,9 @@
         "source" -> "corelight-dns",
         "sourcetype" -> "json",
         "host" -> host,
+        "fields" -> Json.obj(
+            "#path" -> "dns"
+        ),
         "event" -> Json.obj(
             "uid" -> uid,
             "id.orig_h" -> id_orig_h,
