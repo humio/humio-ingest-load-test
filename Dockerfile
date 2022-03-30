@@ -6,6 +6,7 @@ COPY . /humio-ingest-load-test-build/
 RUN \
   apt-get update && \
   apt-get install make curl -y && \
+  apt-get dist-upgrade -y && \
   mkdir /working/ && \
   cd /working/ && \
   curl -L -o sbt-$SBT_VERSION.deb https://repo.scala-sbt.org/scalasbt/debian/sbt-$SBT_VERSION.deb && \
