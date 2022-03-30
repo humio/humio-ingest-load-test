@@ -137,9 +137,11 @@ class TemplateHelper {
   import java.util.TimeZone
   val tz: TimeZone = TimeZone.getTimeZone("UTC")
   val df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+  val dfs = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
   def timestamp(): String = "%.6f".format(ZonedDateTime.now().toInstant.toEpochMilli.toDouble / 1000d)
   def iso8601Timestamp() = df.format(new Date())
+  def iso8601TimestampSeconds() = dfs.format(new Date())
 
   // utilities
   val md = java.security.MessageDigest.getInstance("SHA-1")
