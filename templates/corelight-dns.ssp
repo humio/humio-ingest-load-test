@@ -100,7 +100,8 @@
             "Z" -> z,
             "answers" -> answers,
             "TTLs" -> ttls,
-            "rejected" -> (if (rejected == "1") true else false)
+            "rejected" -> (if (rejected == "1") true else false),
+            "_write_ts" -> iso8601TimestampSeconds
         ),
         "time" -> data.timestamp
     )
