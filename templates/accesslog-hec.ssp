@@ -1,0 +1,93 @@
+<%
+    // Required Imports
+    import com.humio.perftest._
+    import play.api.libs.json._
+    import org.fusesource.scalate._
+    import org.fusesource.scalate.RenderContext._
+	import java.time.LocalDateTime
+	import java.time.format.DateTimeFormatter
+
+    if (init) {
+    	// Load CSV reference files
+    	data.register("referrerCSV", new CSVSampler(data.distributions.uniform, "templates/data/referrer.csv"))
+    	data.register("agentCSV", new CSVSampler(data.distributions.uniform, "templates/data/useragent.csv"))
+    	data.register("userCSV", new CSVSampler(data.distributions.uniform, "templates/data/userid.csv"))
+    	data.register("urlCSV", new CSVSampler(data.distributions.uniform, "templates/data/urls.csv"))
+
+    	// Create array http methods and status codes
+        data.register("method",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("GET", "POST", "PUT", "DELETE", "OPTION")
+            )
+        )
+        data.register("statuscode",
+            new ArraySampler(
+                data.distributions.exponential,
+                Array("200", "204", "301", "400", "401", "404")
+            )
+        )
+
+        // Create 4 numbers from 1 to 255 to use to generate IP addresses
+        data.register("ip1", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip2", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip3", new IntSampler(data.distributions.uniform, 1, 255))
+        data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
+
+        // create an integeger for good tagging, rack location 
+        data.register("host", new IntSampler(data.distributions.uniform, 1, 768))
+
+        // Create a value between 99 and 13302 for response size field
+        data.register("responsesize", new IntSampler(data.distributions.uniform, 99, 13302))
+
+        // Create a value between 1000 and 2500 for product id
+        data.register("productid", new IntSampler(data.distributions.uniform, 1000, 2500))
+        data.register("responsetime", new IntSampler(data.distributions.exponential, 1, 200))
+    }
+
+    // Create date string in correct format for accesslog
+    val logtime = LocalDateTime.now
+    val formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss +0000")
+    val tsStr = logtime.format(formatter)
+
+    // Grab single values from the CSV reference files
+    val referrerRow = data.sampleRow("referrerCSV")
+    val referrerStr =  referrerRow(1)
+    val agentRow = data.sampleRow("agentCSV")
+    val agentStr =  agentRow(1)
+    val userRow = data.sampleRow("userCSV")
+    val userStr =  userRow(1)
+    val urlRow = data.sampleRow("urlCSV")
+    var urlStr:String =  urlRow(1)
+
+    val host = data.sample("host")
+    val client = data.sample("ip1")+"."+data.sample("ip2")+"."+data.sample("ip3")+"."+data.sample("ip4")
+    val method =  data.sample("method")
+    val statuscode = data.sample("statuscode")
+    val responsesize = data.sample("responsesize")
+    val responsetime = data.sample("responsetime")
+
+    // Appends a product or blog post number to the end of a url
+    if (urlStr.startsWith("/products")) { urlStr = urlStr + data.sample("productid") }
+    else if (urlStr.startsWith("/blog")) { urlStr = urlStr + data.sample("productid") }
+
+    // HEC Endpoint takes a JSON object
+    val jsonObj = Json.obj(
+        "host" -> host, /// host for tagging
+        "event" -> Json.obj(
+            "client" -> client,
+            "userid" -> userStr,
+            "method" -> method,
+            "url" -> urlStr,
+            "ts" -> tsStr,
+            "httpversion" -> "1.1",
+            "statuscode" -> statuscode,
+            "responsesize" -> responsesize,
+            "referrer" -> referrerStr,
+            "useragent" -> agentStr,
+            "responsetime" -> responsetime
+        ),
+        "time" -> data.timestamp /// Event Time Stamp
+    )
+    val output = Json.toJson(jsonObj)
+%>${output.toString.trim}
