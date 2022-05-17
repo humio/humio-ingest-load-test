@@ -35,7 +35,7 @@
         data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
 
         // create an integeger for good tagging, rack location 
-        data.register("host", new IntSampler(data.distributions.uniform, 1, 768))
+        data.register("host", new IntSampler(data.distributions.uniform, 1, 3000))
 
         // Create a value between 99 and 13302 for response size field
         data.register("responsesize", new IntSampler(data.distributions.uniform, 99, 13302))

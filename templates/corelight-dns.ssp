@@ -25,7 +25,7 @@
             Array("0", "1", "1", "1", "1", "1")))
 
         // host for tagging
-        data.register("host", new IntSampler(data.distributions.uniform, 0, 1600))
+        data.register("host", new IntSampler(data.distributions.uniform, 0, 3000))
 
         // ttl for first answer
         data.register("ttl_1", new CSVSampler(data.distributions.uniform, "templates/data/dns_ttls0.csv"))
