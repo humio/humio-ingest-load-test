@@ -95,7 +95,7 @@ class FixedRateIngestSimulation extends Simulation {
 
   println(s"configured tensGbPerDay: $tensGbPerDay")
   println(s"configured time: $timeInMinutes minutes")
-  println(s"token: $token")
+  println(s"token: XXXXXXXnotprinting")
   println(s"base urls: ${baseUrls}")
 
 
@@ -110,8 +110,6 @@ class FixedRateIngestSimulation extends Simulation {
     .header("Content-Encoding", "gzip") // Matches the processRequestBody(gzipBody)
     .acceptEncodingHeader("*") // "*" or "gzip" or "deflate" or "compress" or "identity"
     .userAgentHeader("gatling client")
-    //.basicAuth("qcSmluq1kkS9xuheGLdFagWRuEBpD5gu", "")
-    .basicAuth(s"$token", "")
   //.authorizationHeader("Bearer qcSmluq1kkS9xuheGLdFagWRuEBpD5gu")
   //.header("Authorization", "Bearer: qcSmluq1kkS9xuheGLdFagWRuEBpD5gu")
 
@@ -120,7 +118,7 @@ class FixedRateIngestSimulation extends Simulation {
     feed(dataspaceFeeder).feed(requestFeeder)
       .pace(Duration(402, MILLISECONDS))
       .exec(http("request_1")
-        .post("/api/v1/dataspaces/${dataspace}/ingest/elasticsearch")
+        .post("/api/v1/ingest/elastic-bulk")
         .body(StringBody("${request}"))
         .processRequestBody(gzipBody)
         .check(status.is(200))
