@@ -110,6 +110,8 @@ class FixedRateIngestSimulation extends Simulation {
     .header("Content-Encoding", "gzip") // Matches the processRequestBody(gzipBody)
     .acceptEncodingHeader("*") // "*" or "gzip" or "deflate" or "compress" or "identity"
     .userAgentHeader("gatling client")
+    .basicAuth(s"$token", "")  
+    // .header("Authorization", "Bearer: ${token}")
   //.authorizationHeader("Bearer qcSmluq1kkS9xuheGLdFagWRuEBpD5gu")
   //.header("Authorization", "Bearer: qcSmluq1kkS9xuheGLdFagWRuEBpD5gu")
 
