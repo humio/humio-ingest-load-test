@@ -28,7 +28,7 @@ class HECTemplateSimulation extends Simulation {
   val users = Option(System.getProperty("users")).getOrElse("3").toInt
   val timeInMinutes = Option(System.getProperty("time")).getOrElse("300").toInt
   val token = Option(System.getProperty("token")).getOrElse("developer")
-  val meanPauseDurationMs = Option(System.getProperty("pausetime")).getOrElse("10").toInt
+  val meanPauseDurationMs = Option(System.getProperty("pausetime")).getOrElse("3").toInt
   val baseUrlString = Option(System.getProperty("baseurls")).getOrElse("https://testcloud01.humio.com")
   val baseUrls = baseUrlString.split(",").toList
 
@@ -68,7 +68,6 @@ class HECTemplateSimulation extends Simulation {
     scn.inject(
       rampUsers(users) during(5 seconds)
     )
-      .exponentialPauses
       .protocols(httpConf)
   )
 }
