@@ -67,7 +67,8 @@ class HECSimulation extends Simulation {
 
   val baseUrlString = Option(System.getProperty("baseurls")).getOrElse("https://testcloud01.humio.com")
 
-  val baseUrls = baseUrlString.split(",").toList
+  val baseUrlsPre = baseUrlString.split(",").toList
+  val baseUrls = Random.shuffle(baseUrlsPre)
 
   println(s"configured users=$users")
   println(s"configured time=$timeInMinutes minutes")
