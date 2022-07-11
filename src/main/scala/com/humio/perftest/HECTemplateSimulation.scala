@@ -30,7 +30,8 @@ class HECTemplateSimulation extends Simulation {
   val token = Option(System.getProperty("token")).getOrElse("developer")
   val meanPauseDurationMs = Option(System.getProperty("pausetime")).getOrElse("3").toInt
   val baseUrlString = Option(System.getProperty("baseurls")).getOrElse("https://testcloud01.humio.com")
-  val baseUrls = baseUrlString.split(",").toList
+  val baseUrlsPre = baseUrlString.split(",").toList
+  val baseUrls = Random.shuffle(baseUrlsPre)
 
   println(s"Configuration:\n")
   println(s"users=$users")
