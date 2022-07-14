@@ -13,6 +13,7 @@
     	data.register("agentCSV", new CSVSampler(data.distributions.uniform, "templates/data/useragent.csv"))
     	data.register("userCSV", new CSVSampler(data.distributions.uniform, "templates/data/userid.csv"))
     	data.register("urlCSV", new CSVSampler(data.distributions.uniform, "templates/data/urls.csv"))
+    	data.register("clientCSV", new CSVSampler(data.distributions.uniform, "templates/data/ip_list.csv"))
 
     	// Create array http methods and status codes
         data.register("method",
@@ -29,10 +30,10 @@
         )
 
         // Create 4 numbers from 1 to 255 to use to generate IP addresses
-        data.register("ip1", new IntSampler(data.distributions.uniform, 1, 255))
-        data.register("ip2", new IntSampler(data.distributions.uniform, 1, 255))
-        data.register("ip3", new IntSampler(data.distributions.uniform, 1, 255))
-        data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
+        // data.register("ip1", new IntSampler(data.distributions.uniform, 1, 255))
+        // data.register("ip2", new IntSampler(data.distributions.uniform, 1, 255))
+        // data.register("ip3", new IntSampler(data.distributions.uniform, 1, 255))
+        // data.register("ip4", new IntSampler(data.distributions.uniform, 1, 255))
 
         // create an integeger for good tagging, rack location 
         data.register("host", new IntSampler(data.distributions.uniform, 1, 512))
@@ -60,9 +61,12 @@
     val userStr =  userRow(1)
     val urlRow = data.sampleRow("urlCSV")
     var urlStr:String =  urlRow(1)
+    
 
     val host = data.sample("host")
-    val client = data.sample("ip1")+"."+data.sample("ip2")+"."+data.sample("ip3")+"."+data.sample("ip4")
+    // val client = data.sample("ip1")+"."+data.sample("ip2")+"."+data.sample("ip3")+"."+data.sample("ip4")
+    val clientRow = data.sampleRow("clientCSV")
+    var client =  clientRow(1)
     val method =  data.sample("method")
     val statuscode = data.sample("statuscode")
     val responsesize = data.sample("responsesize")
