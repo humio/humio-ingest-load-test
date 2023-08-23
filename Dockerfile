@@ -1,20 +1,34 @@
-FROM azul/zulu-openjdk-debian:11 
-ARG SBT_VERSION=1.5.7
+FROM  azul/zulu-openjdk-alpine:13
+ENV SCALA_VERSION=2.13.4 \
+  SCALA_HOME=/usr/share/scala \
+  SBT_VERSION=1.5.7
 
 COPY . /humio-ingest-load-test-build/
-# Install sbt
 RUN \
-  apt-get update && \
-  apt-get install make curl -y && \
-  apt-get dist-upgrade -y && \
-  mkdir /working/ && \
-  cd /working/ && \
-  curl -L -o sbt-$SBT_VERSION.deb https://repo.scala-sbt.org/scalasbt/debian/sbt-$SBT_VERSION.deb && \
-  dpkg -i sbt-$SBT_VERSION.deb && \
-  rm sbt-$SBT_VERSION.deb && \
-  cd && \
-  rm -r /working/ && \
-  rm -rf /var/lib/apt/lists/* && \
+  apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
+  apk add --no-cache bash && \
+  apk add --no-cache make && \
+  cd "/tmp" && \
+  wget "https://downloads.typesafe.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz" && \
+  tar xzf "scala-${SCALA_VERSION}.tgz" && \
+  mkdir "${SCALA_HOME}" && \
+  rm "/tmp/scala-${SCALA_VERSION}/bin/"*.bat && \
+  mv "/tmp/scala-${SCALA_VERSION}/bin" "/tmp/scala-${SCALA_VERSION}/lib" "${SCALA_HOME}" && \
+  ln -s "${SCALA_HOME}/bin/"* "/usr/bin/" && \
+  apk del .build-dependencies && \
+  rm -rf "/tmp/"* 
+
+RUN \  
+  echo "$SCALA_VERSION $SBT_VERSION" && \
+  apk add --no-cache bash curl bc ca-certificates && \
+  update-ca-certificates && \
+  scala -version && \
+  scalac -version && \
+  curl -fsL https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz | tar xfz - -C /usr/local && \
+  $(mv /usr/local/sbt-launcher-packaging-$SBT_VERSION /usr/local/sbt || true) && \
+  ln -s /usr/local/sbt/bin/* /usr/local/bin/ && \
+  apk del curl && \
+  sbt -Dsbt.rootdir=true sbtVersion && \
   cd /humio-ingest-load-test-build && \
   make && \
   mkdir /humio-ingest-load-test && \

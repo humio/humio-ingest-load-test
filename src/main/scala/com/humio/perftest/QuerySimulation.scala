@@ -19,12 +19,16 @@ import com.humio.perftest.QuerySimulation._
 
 class QuerySimulation extends Simulation {
 
-  val dataspaceFeeder = Iterator.continually(Map("dataspace" -> ("dataspace" + random.nextInt(dataspaces))))
 
   val timeInMinutes = Option(System.getProperty("time")).getOrElse("120").toInt
 
+  val repo = Option(System.getProperty("repo")).getOrElse("humio")
+
+  val dataspaceFeeder = Iterator.continually(Map("dataspace" -> ("dataspace" + random.nextInt(dataspaces)), "repo" -> repo))
+
   val searchQuery = Option(System.getProperty("searchQuery")).getOrElse("count()")
   val searchDuration = Option(System.getProperty("searchDuration")).getOrElse("24hours")
+  val token = Option(System.getProperty("token")).getOrElse("developer")
 
   val baseUrls = Option(System.getProperty("baseurls"))
     .map { str => str.split(",").toList }
@@ -44,6 +48,7 @@ class QuerySimulation extends Simulation {
     .acceptHeader("application/json") // Here are the common headers
     .header("Content-Encoding", "gzip") // Matches the processRequestBody(gzipBody)
     .acceptEncodingHeader("*") // "*" or "gzip" or "deflate" or "compress" or "identity"
+    .authorizationHeader(s"Bearer ${token}")
     .userAgentHeader("gatling client")
 
   val countScenario = scenario("Create count query") // A scenario is a chain of requests and pauses
@@ -52,7 +57,7 @@ class QuerySimulation extends Simulation {
       .pace(Duration(1, TimeUnit.MINUTES))
       .exec(_.set("queryDone", "false"))
       .exec(http("create_queryjob")
-        .post("/api/v1/dataspaces/${dataspace}/queryjobs")
+        .post("/api/v1/dataspaces/${repo}/queryjobs")
         .body(StringBody(s"""{"queryString": "${searchQuery}", "start": "${searchDuration}"}"""))
         .processRequestBody(gzipBody)
         .check(status.is(200))
@@ -60,7 +65,7 @@ class QuerySimulation extends Simulation {
       )
       .asLongAs(session => session("queryDone").as[String] != "true") {
         exec(http("lookup_queryjob")
-          .get("/api/v1/dataspaces/${dataspace}/queryjobs/${queryJobId}")
+          .get("/api/v1/dataspaces/${repo}/queryjobs/${queryJobId}")
           .check(jsonPath("$.done").saveAs("queryDone")
           )
         )

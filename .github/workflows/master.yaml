@@ -20,11 +20,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install six
     - name: CrowdStrike Container Image Scan Humio Ingest Load Test
-      uses: crowdstrike/container-image-scan-action@v0.4
+      uses: crowdstrike/container-image-scan-action@v1
       with:
         falcon_client_id: 1cd30708cb31442f85a6eec83279fe7b
         container_repository: humio/humio-ingest-load-test
         container_tag: ${{ env.GIT_SHA }}
+        retry_count: 60
       env:
         FALCON_CLIENT_SECRET: "${{ secrets.FALCON_CLIENT_SECRET }}"
     - name: Login to DockerHub
