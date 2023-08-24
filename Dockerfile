@@ -5,6 +5,8 @@ ENV SCALA_VERSION=2.13.4 \
 
 COPY . /humio-ingest-load-test-build/
 RUN \
+  apk update && \
+  apk upgrade && \
   apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
   apk add --no-cache bash && \
   apk add --no-cache make && \
