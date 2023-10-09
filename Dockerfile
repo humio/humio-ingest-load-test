@@ -1,5 +1,5 @@
 FROM azul/zulu-openjdk-debian:11 
-ARG SBT_VERSION=1.5.7
+ARG SBT_VERSION=1.9.6
 
 COPY . /humio-ingest-load-test-build/
 # Install sbt
@@ -18,7 +18,7 @@ RUN \
   cd /humio-ingest-load-test-build && \
   make && \
   mkdir /humio-ingest-load-test && \
-  cp /humio-ingest-load-test-build/target/scala-2.12/perftest.jar /humio-ingest-load-test/ && \
+  cp /humio-ingest-load-test-build/target/scala-2.13/perftest.jar /humio-ingest-load-test/ && \
   cp /humio-ingest-load-test-build/entrypoint.sh /humio-ingest-load-test/ && \
   cp -R /humio-ingest-load-test-build/templates /humio-ingest-load-test/templates && \
   rm -rf /humio-ingest-load-test-build && \
