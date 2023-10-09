@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-debian:11 
+FROM azul/zulu-openjdk-debian:17
 ARG SBT_VERSION=1.9.6
 
 COPY . /humio-ingest-load-test-build/
