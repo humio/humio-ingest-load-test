@@ -1,9 +1,9 @@
 .PHONY: clean
 
-all: clean target/scala-2.12/perftest.jar
+all: clean target/scala-2.13/perftest.jar
 
 clean:
 	rm -rf target dist
 
-target/scala-2.12/perftest.jar:
+target/scala-2.13/perftest.jar:
 	sbt assembly

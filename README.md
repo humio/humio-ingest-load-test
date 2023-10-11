@@ -12,7 +12,7 @@ Execute `sbt assembly` or just plain `make`
 
 ## Running
 
-Copy the resulting executable `target/scala-2.12/perftest.jar` to some
+Copy the resulting executable `target/scala-2.13/perftest.jar` to some
 machine close to the server(s) to test, then execute something like
 this, perhaps in multiple copies in parallel, as the users parameter
 does not add load linearly for higher numbers. Replace the

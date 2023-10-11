@@ -1,7 +1,7 @@
-FROM  azul/zulu-openjdk-alpine:13
-ENV SCALA_VERSION=2.13.4 \
+FROM  azul/zulu-openjdk-alpine:17
+ENV SCALA_VERSION=2.13.12 \
   SCALA_HOME=/usr/share/scala \
-  SBT_VERSION=1.5.7
+  SBT_VERSION=1.9.6
 
 COPY . /humio-ingest-load-test-build/
 RUN \
@@ -34,7 +34,7 @@ RUN \
   cd /humio-ingest-load-test-build && \
   make && \
   mkdir /humio-ingest-load-test && \
-  cp /humio-ingest-load-test-build/target/scala-2.12/perftest.jar /humio-ingest-load-test/ && \
+  cp /humio-ingest-load-test-build/target/scala-2.13/perftest.jar /humio-ingest-load-test/ && \
   cp /humio-ingest-load-test-build/entrypoint.sh /humio-ingest-load-test/ && \
   cp -R /humio-ingest-load-test-build/templates /humio-ingest-load-test/templates && \
   rm -rf /humio-ingest-load-test-build && \
