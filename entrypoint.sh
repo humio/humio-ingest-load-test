@@ -47,6 +47,8 @@ query_simulation() {
   common_args
   env_var_arg PERF_SEARCH_QUERY searchQuery
   env_var_arg PERF_SEARCH_DURATION searchDuration
+  env_var_arg PERF_SEARCH_REPO repo
+  env_var_arg HUMIO_TOKEN token
 }
 
 case $perf_simulation in
