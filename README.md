@@ -54,7 +54,7 @@ docker run \
 ```
 docker run \
   -e PERF_TIME=300 \
-  -e PERF_USERS=1000 \
+  -e PERF_USERS=5 \
   -e PERF_DATASOURCES=50 \
   -e PERF_BULK_SIZE=1000 \
   -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
@@ -67,7 +67,7 @@ docker run \
 ```
 docker run \
   -e PERF_TIME=300 \
-  -e PERF_USERS=1000 \
+  -e PERF_USERS=5 \
   -e PERF_DATASOURCES=50 \
   -e PERF_BULK_SIZE=1000 \
   -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
@@ -81,7 +81,7 @@ docker run \
 ```
 docker run \
   -e PERF_TIME=300 \
-  -e PERF_USERS=1000 \
+  -e PERF_USERS=5 \
   -e PERF_DATASOURCES=50 \
   -e PERF_BULK_SIZE=1000 \
   -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
@@ -93,7 +93,7 @@ docker run \
 # If you want to use a custom templates and data you need to mount a local volume into the container.
 docker run \
   -e PERF_TIME=300 \
-  -e PERF_USERS=1000 \
+  -e PERF_USERS=5 \
   -e PERF_DATASOURCES=50 \
   -e PERF_BULK_SIZE=1000 \
   -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
@@ -109,7 +109,8 @@ docker run \
 docker run \
   -e PERF_SEARCH_QUERY="count()" \
   -e PERF_SEARCH_DURATION=24hours \
-  -e HUMIO_TOKEN=<SOME-INGEST-TOKEN> \
+  -e PERF_SEARCH_REPO=<REPO TO QUERY> \ 
+  -e HUMIO_TOKEN=<PERSON-API-TOKEN> \
   -e HUMIO_BASE_URL=<URL to Humio> \
   -e PERF_SIMULATION=QuerySimulation \
   humio/humio-ingest-load-test:latest
